@@ -22,13 +22,16 @@ class Network(nn.Module):
 
 
 class DQN:
-    def __init__(self, n_replay, n_state, n_action, learning_rate=0.1, gamma=0.9, epsilon=0.1):
+    def __init__(self, n_replay, n_state, n_action, load_param=False, learning_rate=0.1, gamma=0.95, epsilon=0.1):
         # parameters init
         self.n_replay = n_replay
         self.n_state = n_state
         self.n_action = n_action
 
-        self.q_net = Network(n_state=self.n_state, n_action=self.n_action)
+        if load_param is True:
+            self.load_net()
+        else:
+            self.q_net = Network(n_state=self.n_state, n_action=self.n_action)
 
         self.optimizer = torch.optim.SGD(self.q_net.parameters(), lr=learning_rate)
         self.loss_func = nn.MSELoss()
@@ -36,7 +39,7 @@ class DQN:
         self.lr = learning_rate
         self.gamma = gamma
         self.epsilon = epsilon
-        self.batch_size = 32
+        self.batch_size = 64
 
         # replay init
         self.replay = []
@@ -103,17 +106,23 @@ class DQN:
             self.pointer = 0
             self.replay[self.pointer] = transition
 
+    def save_net(self):
+        torch.save(self.q_net, 'params/dqn.pkl')
+
+    def load_net(self):
+        self.q_net = torch.load('params/dqn.pkl')
+
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.01)
+    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.005)
     env.reset()
-    for episode in range(1000000):
+    for episode in range(5000):
         observation = env.reset()
         state = observation
         reward = 0
         for t in range(500):
-            if episode > 1000:
+            if episode > 3000:
                 env.render()
             state_before = state
             action = agent.choose_action(state)
@@ -131,7 +140,15 @@ if __name__ == '__main__':
                 print("Episode {}: finished after {} timesteps".format(episode, t+1))
                 break
             agent.store_transition(state.tolist() + [action] + [reward] + state_before.tolist())
+
+            # learn when replay has enough transitions
             if episode >= 5:
                 if t % 3 == 0:
                     agent.learn()
+
+            # save success params
+            if t > 400:
+                if episode % 20 == 0:
+                    agent.save_net()
+
     env.close()
