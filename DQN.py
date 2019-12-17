@@ -115,14 +115,16 @@ class DQN:
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.005)
+    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.005, load_param=True)
+    LEARN = False
+
     env.reset()
     for episode in range(5000):
         observation = env.reset()
         state = observation
         reward = 0
         for t in range(500):
-            if episode > 3000:
+            if episode > 3000 or LEARN is False:
                 env.render()
             state_before = state
             action = agent.choose_action(state)
@@ -143,7 +145,7 @@ if __name__ == '__main__':
 
             # learn when replay has enough transitions
             if episode >= 5:
-                if t % 3 == 0:
+                if t % 3 == 0 and LEARN is True:
                     agent.learn()
 
             # save success params
