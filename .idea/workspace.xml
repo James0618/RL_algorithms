@@ -4,8 +4,6 @@
     <list default="true" id="0109929d-eda2-402d-902a-496a2b95fc2c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Actor_Critic.py" beforeDir="false" afterPath="$PROJECT_DIR$/Actor_Critic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DQN.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQN.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/params/dqn.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/params/dqn.pkl" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -44,6 +42,7 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="ToolWindowDuplicates.ShowToolbar" value="false" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
@@ -134,7 +133,7 @@
       <workItem from="1576483586822" duration="3386000" />
       <workItem from="1576493455413" duration="4701000" />
       <workItem from="1576502870320" duration="4356000" />
-      <workItem from="1576568968825" duration="3807000" />
+      <workItem from="1576568968825" duration="15157000" />
     </task>
     <servers />
   </component>
