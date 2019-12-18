@@ -64,7 +64,29 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.DQN">
+  <component name="RunManager" selected="Python.Actor_Critic">
+    <configuration name="Actor_Critic" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="RL_algorithms" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Actor_Critic.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="DDPG" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="RL_algorithms" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -111,6 +133,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.Actor_Critic" />
         <item itemvalue="Python.DQN" />
         <item itemvalue="Python.DDPG" />
       </list>
@@ -133,7 +156,8 @@
       <workItem from="1576483586822" duration="3386000" />
       <workItem from="1576493455413" duration="4701000" />
       <workItem from="1576502870320" duration="4356000" />
-      <workItem from="1576568968825" duration="15157000" />
+      <workItem from="1576568968825" duration="15350000" />
+      <workItem from="1576633322766" duration="7873000" />
     </task>
     <servers />
   </component>
@@ -155,6 +179,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/RL_algorithms$DDPG.coverage" NAME="DDPG Coverage Results" MODIFIED="1576484371478" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$Actor_Critic.coverage" NAME="Actor_Critic Coverage Results" MODIFIED="1576639920867" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DQN.coverage" NAME="DQN Coverage Results" MODIFIED="1576573587644" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
