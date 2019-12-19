@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0109929d-eda2-402d-902a-496a2b95fc2c" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/PPO.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Actor_Critic.py" beforeDir="false" afterPath="$PROJECT_DIR$/Actor_Critic.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -157,7 +157,8 @@
       <workItem from="1576493455413" duration="4701000" />
       <workItem from="1576502870320" duration="4356000" />
       <workItem from="1576568968825" duration="15350000" />
-      <workItem from="1576633322766" duration="7873000" />
+      <workItem from="1576633322766" duration="8152000" />
+      <workItem from="1576742295475" duration="611000" />
     </task>
     <servers />
   </component>
