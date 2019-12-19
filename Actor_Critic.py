@@ -92,7 +92,7 @@ class Critic:
 
 
 if __name__ == '__main__':
-    env = gym.make('CartPole-v0')
+    env = gym.make('CartPole-v1')
     actor = Actor(n_state=2*env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.005)
     critic = Critic(n_state=2*env.observation_space.shape[0], learning_rate=0.005)
     env.reset()
@@ -101,9 +101,9 @@ if __name__ == '__main__':
         observation = env.reset()
         state = observation
         reward = 0
-        for t in range(250):
-            # if episode > 1000:
-            #     env.render()
+        for t in range(1000):
+            if episode > 4000:
+                env.render()
             if t < 1:
                 observation, _, done, info = env.step(0)
                 state = np.append(state, observation)
@@ -125,5 +125,6 @@ if __name__ == '__main__':
                     break
                 advantage = critic.learn(state=state_before, reward=reward, state_=state)
                 actor.learn(state=state_before, action=action, advantage=advantage)
+        print("Episode {}: finished after {} timesteps".format(episode, 'max'))
 
     env.close()
