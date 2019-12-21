@@ -9,11 +9,11 @@ class ValueNet(nn.Module):
     def __init__(self, n_state):
         super(ValueNet, self).__init__()
         self.state_value = nn.Sequential(
-            nn.Linear(n_state, 128),
+            nn.Linear(n_state, 64),
             nn.ReLU(),
-            nn.Linear(128, 64),
+            nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(64, 1),
+            nn.Linear(32, 1),
         )
 
     def forward(self, state):
@@ -25,9 +25,9 @@ class PolicyNet(nn.Module):
     def __init__(self, n_state, n_action):
         super(PolicyNet, self).__init__()
         self.policy = nn.Sequential(
-            nn.Linear(n_state, 128),
+            nn.Linear(n_state, 64),
             nn.ReLU(),
-            nn.Linear(128, 64),
+            nn.Linear(64, 64),
             nn.ReLU(),
             nn.Linear(64, n_action),
         )
@@ -85,7 +85,7 @@ class Model:
         policy_optimizer = torch.optim.SGD(params=self.policy.parameters(), lr=self.learning_rate)
         state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=2*self.learning_rate)
         # loss_func = nn.KLDivLoss()
-        for j in range(10):
+        for j in range(8):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
             ratio = torch.div(self.policy.forward(state_collections).log_prob(action_collections),
@@ -106,7 +106,7 @@ class Model:
             policy_loss.backward(retain_graph=True)
             policy_optimizer.step()
 
-        for j in range(10):
+        for j in range(8):
             advantage_collections = torch.FloatTensor([])  # Tensor[T]
             for i in range(1, T + 1):
                 # t: T -> 1
@@ -139,8 +139,9 @@ class Model:
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    model = Model(n_state=2*env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.001)
+    model = Model(n_state=2*env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.0005)
     env.reset()
+    BATCH_SIZE = 16
 
     for episode in range(50000):
         observation = env.reset()
@@ -151,7 +152,7 @@ if __name__ == '__main__':
         action_collections = torch.FloatTensor([])
         reward_collections = torch.FloatTensor([])
         for t in range(1000):
-            if episode > 4000:
+            if episode > 40000:
                 env.render()
             if t < 1:
                 observation, _, done, info = env.step(0)
@@ -186,10 +187,22 @@ if __name__ == '__main__':
                 state = np.append(state[-4:], observation)  # next state
                 if t == 1000 - 1:
                     done = True
+                if t % BATCH_SIZE == 0:
+                    model.learn(state_collections=state_collections, action_collections=action_collections,
+                                reward_collections=reward_collections, final_state=torch.FloatTensor(state))
+                    state_collections = torch.FloatTensor([[]])
+                    action_collections = torch.FloatTensor([])
+                    reward_collections = torch.FloatTensor([])
+                    if done:
+                        break
+
                 if done:
                     model.learn(state_collections=state_collections, action_collections=action_collections,
                                 reward_collections=reward_collections, final_state=torch.FloatTensor(state))
                     print("Episode {}: finished after {} timesteps".format(episode, t + 1))
+                    state_collections = torch.FloatTensor([[]])
+                    action_collections = torch.FloatTensor([])
+                    reward_collections = torch.FloatTensor([])
                     break
 
     env.close()
