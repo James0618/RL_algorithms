@@ -27,20 +27,21 @@ class PolicyNet(nn.Module):
         self.policy = nn.Sequential(
             nn.Linear(n_state, 64),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(64, n_action),
+            nn.Linear(32, n_action),
         )
 
     def forward(self, state):
         actions = self.policy(state)
         action_prob = torch.nn.functional.softmax(actions)
+        # print('action_prob: ', action_prob)
         distribution = Categorical(action_prob)
         return distribution
 
 
 class Model:
-    def __init__(self, n_state, n_action, gamma=0.95, lamb=0.5, kl_target=0.01, learning_rate=0.005):
+    def __init__(self, n_state, n_action, gamma=0.95, learning_rate=0.005, epsilon=0.2):
         # init networks
         self.policy = PolicyNet(n_state=n_state, n_action=n_action)
         self.old_policy = PolicyNet(n_state=n_state, n_action=n_action)
@@ -49,9 +50,8 @@ class Model:
         self.n_state = n_state
         self.n_action = n_action
         self.gamma = gamma
-        self.lamb = lamb
-        self.kl_target = kl_target
         self.learning_rate = learning_rate
+        self.epsilon = epsilon
 
     def learn(self, state_collections, action_collections, reward_collections, final_state):
         """
@@ -63,7 +63,7 @@ class Model:
         """
         T = state_collections.shape[0]
         returns = self.state_value(final_state)  # V(S_final)
-        advantage_collections = torch.FloatTensor([])   # Tensor[T]
+        advantage_collections = torch.FloatTensor([])  # Tensor[T]
         for i in range(1, T + 1):
             # t: T -> 1
             # Returns[t] = r[t] + gamma * Returns[t+1]
@@ -78,24 +78,31 @@ class Model:
         old_policy = PolicyNet(n_state=self.n_state, n_action=self.n_action)
         old_policy.load_state_dict(torch.load('params/old_policy_net.pkl'))
 
-        policy_optimizer = torch.optim.SGD(params=self.policy.parameters(), lr=self.learning_rate)
+        policy_optimizer = torch.optim.SGD(params=self.policy.parameters(), lr=2*self.learning_rate)
         state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=self.learning_rate)
-        loss_func = nn.KLDivLoss()
+        # loss_func = nn.KLDivLoss()
         for j in range(10):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
-            print(self.policy(state_collections).log_prob(action_collections))
-            policy_loss = -(-self.lamb*loss_func(torch.log(old_policy(state_collections).probs),
-                                                 torch.log(self.policy(state_collections).probs)) +
-                            torch.mean(torch.mul(torch.exp(self.policy(state_collections).log_prob(action_collections) -
-                                                           old_policy(state_collections).log_prob(action_collections)),
-                                                 advantage_collections.detach())))
-            print(j, policy_loss)
+            ratio = torch.div(self.policy.forward(state_collections).log_prob(action_collections),
+                              old_policy.forward(state_collections).log_prob(action_collections))
+            policy_loss = - torch.mean(torch.min(torch.mul(ratio, advantage_collections.detach()),
+                                                 torch.mul(torch.clamp(ratio, min=1-self.epsilon, max=1+self.epsilon),
+                                                           advantage_collections)
+                                                 )
+                                       )
+            # print(policy_loss)
+            # policy_loss = -(-self.lamb * loss_func(torch.log(old_policy.forward(state_collections).probs),
+            #                                            torch.log(self.policy.forward(state_collections).probs)) +
+            #                     torch.mean(torch.mul(
+            #                         torch.exp(self.policy.forward(state_collections).log_prob(action_collections) -
+            #                                   old_policy.forward(state_collections).log_prob(action_collections)),
+            #                         advantage_collections.detach())))
             policy_optimizer.zero_grad()
-            policy_loss.backward()
+            policy_loss.backward(retain_graph=True)
             policy_optimizer.step()
 
-        for j in range(25):
+        for j in range(10):
             for i in range(1, T + 1):
                 # t: T -> 1
                 # Returns[t] = r[t] + gamma * Returns[t+1]
@@ -111,22 +118,23 @@ class Model:
             state_value_optimizer.step()
 
         # print(old_policy(state_collections).probs)
-        if loss_func(torch.log(old_policy(state_collections).probs),
-                     torch.log(self.policy(state_collections).probs)) > self.kl_target * 1.5:
-            self.lamb = self.lamb * 2
-        elif loss_func(torch.log(old_policy(state_collections).probs),
-                       torch.log(self.policy(state_collections).probs)) < self.kl_target / 1.5:
-            self.lamb = self.lamb / 2
+        # if loss_func(torch.log(old_policy.forward(state_collections).probs),
+        #              torch.log(self.policy.forward(state_collections).probs)) > self.kl_target * 1.5:
+        #     self.lamb = self.lamb * 2
+        # elif loss_func(torch.log(old_policy.forward(state_collections).probs),
+        #                torch.log(self.policy.forward
+        #                              (state_collections).probs)) < self.kl_target / 1.5:
+        #     self.lamb = self.lamb / 2
 
     def choose_action(self, state):
-        # print(self.policy.forward(state).probs)
+        print(self.policy.forward(state).probs)
         action = self.policy.forward(state).sample()
         return action
 
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    model = Model(n_state=2*env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.005)
+    model = Model(n_state=2 * env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.005)
     env.reset()
 
     for episode in range(5000):
@@ -170,13 +178,13 @@ if __name__ == '__main__':
                 else:
                     reward_collections = torch.cat((reward_collections, torch.FloatTensor([reward])))
 
-                state = np.append(state[-4:], observation)    # next state
+                state = np.append(state[-4:], observation)  # next state
                 if t == 1000 - 1:
                     done = True
                 if done:
                     model.learn(state_collections=state_collections, action_collections=action_collections,
                                 reward_collections=reward_collections, final_state=torch.FloatTensor(state))
-                    print("Episode {}: finished after {} timesteps".format(episode, t+1))
+                    print("Episode {}: finished after {} timesteps".format(episode, t + 1))
                     break
 
     env.close()
