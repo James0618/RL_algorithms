@@ -27,9 +27,9 @@ class PolicyNet(nn.Module):
         self.policy = nn.Sequential(
             nn.Linear(n_state, 64),
             nn.ReLU(),
-            nn.Linear(64, 32),
+            nn.Linear(64, 64),
             nn.ReLU(),
-            nn.Linear(32, n_action),
+            nn.Linear(64, n_action),
         )
 
     def forward(self, state):
@@ -74,23 +74,27 @@ class Model:
             else:
                 advantage_collections = torch.cat((advantage_collections, advantage.unsqueeze(0)))
 
+        idx = [i for i in range(advantage_collections.size(0)-1, -1, -1)]
+        idx = torch.LongTensor(idx)
+        advantage_collections = advantage_collections.index_select(0, idx)
+
         torch.save(self.policy.state_dict(), 'params/old_policy_net.pkl')
         old_policy = PolicyNet(n_state=self.n_state, n_action=self.n_action)
         old_policy.load_state_dict(torch.load('params/old_policy_net.pkl'))
 
-        policy_optimizer = torch.optim.SGD(params=self.policy.parameters(), lr=2*self.learning_rate)
-        state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=self.learning_rate)
+        policy_optimizer = torch.optim.SGD(params=self.policy.parameters(), lr=self.learning_rate)
+        state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=2*self.learning_rate)
         # loss_func = nn.KLDivLoss()
         for j in range(10):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
             ratio = torch.div(self.policy.forward(state_collections).log_prob(action_collections),
                               old_policy.forward(state_collections).log_prob(action_collections))
-            policy_loss = - torch.mean(torch.min(torch.mul(ratio, advantage_collections.detach()),
-                                                 torch.mul(torch.clamp(ratio, min=1-self.epsilon, max=1+self.epsilon),
-                                                           advantage_collections)
-                                                 )
-                                       )
+            policy_loss = torch.mean(torch.min(torch.mul(ratio, advantage_collections.detach()),
+                                               torch.mul(torch.clamp(ratio, min=1-self.epsilon, max=1+self.epsilon),
+                                                         advantage_collections)
+                                                         )
+                                               )
             # print(policy_loss)
             # policy_loss = -(-self.lamb * loss_func(torch.log(old_policy.forward(state_collections).probs),
             #                                            torch.log(self.policy.forward(state_collections).probs)) +
@@ -127,17 +131,17 @@ class Model:
         #     self.lamb = self.lamb / 2
 
     def choose_action(self, state):
-        print(self.policy.forward(state).probs)
+        # print(self.policy.forward(state).probs)
         action = self.policy.forward(state).sample()
         return action
 
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    model = Model(n_state=2 * env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.005)
+    model = Model(n_state=2 * env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.0001)
     env.reset()
 
-    for episode in range(5000):
+    for episode in range(50000):
         observation = env.reset()
         state = observation
 
