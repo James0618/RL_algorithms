@@ -9,11 +9,11 @@ class ValueNet(nn.Module):
     def __init__(self, n_state):
         super(ValueNet, self).__init__()
         self.state_value = nn.Sequential(
-            nn.Linear(n_state, 64),
+            nn.Linear(n_state, 128),
             nn.ReLU(),
-            nn.Linear(64, 32),
+            nn.Linear(128, 64),
             nn.ReLU(),
-            nn.Linear(32, 1),
+            nn.Linear(64, 1),
         )
 
     def forward(self, state):
@@ -25,16 +25,16 @@ class PolicyNet(nn.Module):
     def __init__(self, n_state, n_action):
         super(PolicyNet, self).__init__()
         self.policy = nn.Sequential(
-            nn.Linear(n_state, 64),
+            nn.Linear(n_state, 128),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(128, 64),
             nn.ReLU(),
             nn.Linear(64, n_action),
         )
 
     def forward(self, state):
         actions = self.policy(state)
-        action_prob = torch.nn.functional.softmax(actions)
+        action_prob = torch.nn.functional.softmax(actions, dim=0)
         # print('action_prob: ', action_prob)
         distribution = Categorical(action_prob)
         return distribution
@@ -62,13 +62,13 @@ class Model:
         :return:
         """
         T = state_collections.shape[0]
-        returns = self.state_value(final_state)  # V(S_final)
+        returns = self.state_value.forward(final_state)  # V(S_final)
         advantage_collections = torch.FloatTensor([])  # Tensor[T]
         for i in range(1, T + 1):
             # t: T -> 1
             # Returns[t] = r[t] + gamma * Returns[t+1]
             returns = reward_collections[T - i] + self.gamma * returns
-            advantage = returns - self.state_value(state_collections[T - i])
+            advantage = returns - self.state_value.forward(state_collections[T - i])
             if advantage_collections.shape[0] == 0:
                 advantage_collections = advantage.unsqueeze(0)
             else:
@@ -90,11 +90,11 @@ class Model:
             # J = -loss
             ratio = torch.div(self.policy.forward(state_collections).log_prob(action_collections),
                               old_policy.forward(state_collections).log_prob(action_collections))
-            policy_loss = torch.mean(torch.min(torch.mul(ratio, advantage_collections.detach()),
-                                               torch.mul(torch.clamp(ratio, min=1-self.epsilon, max=1+self.epsilon),
-                                                         advantage_collections)
-                                                         )
-                                               )
+            policy_loss = - torch.mean(torch.min(torch.mul(ratio, advantage_collections.detach()),
+                                                 torch.mul(torch.clamp(ratio, min=1-self.epsilon, max=1+self.epsilon),
+                                                           advantage_collections.detach())
+                                                 )
+                                       )
             # print(policy_loss)
             # policy_loss = -(-self.lamb * loss_func(torch.log(old_policy.forward(state_collections).probs),
             #                                            torch.log(self.policy.forward(state_collections).probs)) +
@@ -107,11 +107,12 @@ class Model:
             policy_optimizer.step()
 
         for j in range(10):
+            advantage_collections = torch.FloatTensor([])  # Tensor[T]
             for i in range(1, T + 1):
                 # t: T -> 1
                 # Returns[t] = r[t] + gamma * Returns[t+1]
                 returns = reward_collections[T - i] + self.gamma * returns
-                advantage = returns - self.state_value(state_collections[T - i])
+                advantage = returns - self.state_value.forward(state_collections[T - i])
                 if advantage_collections.shape[0] == 0:
                     advantage_collections = advantage.unsqueeze(0)
                 else:
@@ -138,7 +139,7 @@ class Model:
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    model = Model(n_state=2 * env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.0001)
+    model = Model(n_state=2*env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.001)
     env.reset()
 
     for episode in range(50000):
