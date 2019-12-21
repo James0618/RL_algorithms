@@ -9,11 +9,11 @@ class ValueNet(nn.Module):
     def __init__(self, n_state):
         super(ValueNet, self).__init__()
         self.state_value = nn.Sequential(
-            nn.Linear(n_state, 64),
+            nn.Linear(n_state, 128),
             nn.ReLU(),
-            nn.Linear(64, 32),
+            nn.Linear(128, 64),
             nn.ReLU(),
-            nn.Linear(32, 1),
+            nn.Linear(64, 1),
         )
 
     def forward(self, state):
@@ -25,9 +25,9 @@ class PolicyNet(nn.Module):
     def __init__(self, n_state, n_action):
         super(PolicyNet, self).__init__()
         self.policy = nn.Sequential(
-            nn.Linear(n_state, 64),
+            nn.Linear(n_state, 128),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(128, 64),
             nn.ReLU(),
             nn.Linear(64, n_action),
         )
@@ -83,7 +83,7 @@ class Model:
         old_policy.load_state_dict(torch.load('params/old_policy_net.pkl'))
 
         policy_optimizer = torch.optim.SGD(params=self.policy.parameters(), lr=self.learning_rate)
-        state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=2*self.learning_rate)
+        state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=self.learning_rate)
         # loss_func = nn.KLDivLoss()
         for j in range(8):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
@@ -139,7 +139,7 @@ class Model:
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    model = Model(n_state=2*env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.0005)
+    model = Model(n_state=2*env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.0001)
     env.reset()
     BATCH_SIZE = 16
 
