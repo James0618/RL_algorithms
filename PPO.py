@@ -9,9 +9,9 @@ class ValueNet(nn.Module):
     def __init__(self, n_state):
         super(ValueNet, self).__init__()
         self.state_value = nn.Sequential(
-            nn.Linear(n_state, 128),
+            nn.Linear(n_state, 64),
             nn.ReLU(),
-            nn.Linear(128, 64),
+            nn.Linear(64, 64),
             nn.ReLU(),
             nn.Linear(64, 1),
         )
@@ -25,23 +25,23 @@ class PolicyNet(nn.Module):
     def __init__(self, n_state, n_action):
         super(PolicyNet, self).__init__()
         self.policy = nn.Sequential(
-            nn.Linear(n_state, 128),
+            nn.Linear(n_state, 64),
             nn.ReLU(),
-            nn.Linear(128, 64),
+            nn.Linear(64, 64),
             nn.ReLU(),
             nn.Linear(64, n_action),
         )
 
     def forward(self, state):
         actions = self.policy(state)
-        action_prob = torch.nn.functional.softmax(actions, dim=0)
+        action_prob = torch.nn.functional.softmax(actions)
         # print('action_prob: ', action_prob)
         distribution = Categorical(action_prob)
         return distribution
 
 
 class Model:
-    def __init__(self, n_state, n_action, gamma=0.95, learning_rate=0.005, epsilon=0.2):
+    def __init__(self, n_state, n_action, gamma=0.95, learning_rate=0.005, epsilon=0.05):
         # init networks
         self.policy = PolicyNet(n_state=n_state, n_action=n_action)
         self.old_policy = PolicyNet(n_state=n_state, n_action=n_action)
@@ -83,13 +83,14 @@ class Model:
         old_policy.load_state_dict(torch.load('params/old_policy_net.pkl'))
 
         policy_optimizer = torch.optim.SGD(params=self.policy.parameters(), lr=self.learning_rate)
-        state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=self.learning_rate)
+        state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=2*self.learning_rate)
         # loss_func = nn.KLDivLoss()
-        for j in range(8):
+        for j in range(12):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
-            ratio = torch.div(self.policy.forward(state_collections).log_prob(action_collections),
-                              old_policy.forward(state_collections).log_prob(action_collections))
+            # print(torch.exp(self.policy.forward(state_collections).log_prob(action_collections)))
+            ratio = torch.div(torch.exp(self.policy.forward(state_collections).log_prob(action_collections)),
+                              torch.exp(old_policy.forward(state_collections).log_prob(action_collections)))
             policy_loss = - torch.mean(torch.min(torch.mul(ratio, advantage_collections.detach()),
                                                  torch.mul(torch.clamp(ratio, min=1-self.epsilon, max=1+self.epsilon),
                                                            advantage_collections.detach())
@@ -106,7 +107,8 @@ class Model:
             policy_loss.backward(retain_graph=True)
             policy_optimizer.step()
 
-        for j in range(8):
+        for j in range(16):
+            returns = self.state_value.forward(final_state)
             advantage_collections = torch.FloatTensor([])  # Tensor[T]
             for i in range(1, T + 1):
                 # t: T -> 1
@@ -139,7 +141,7 @@ class Model:
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    model = Model(n_state=2*env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.0001)
+    model = Model(n_state=2*env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.005)
     env.reset()
     BATCH_SIZE = 16
 
@@ -165,9 +167,13 @@ if __name__ == '__main__':
                 x, x_dot, theta, theta_dot = observation
                 # use the reward as Morvan Zhou defined
                 # https://github.com/MorvanZhou/PyTorch-Tutorial/blob/master/tutorial-contents/405_DQN_Reinforcement_learning.py
-                r1 = (env.x_threshold - abs(x)) / env.x_threshold - 0.8
-                r2 = (env.theta_threshold_radians - abs(theta)) / env.theta_threshold_radians - 0.5
-                reward = r1 + r2
+                # r1 = (env.x_threshold - abs(x)) / env.x_threshold - 0.8
+                # r2 = (env.theta_threshold_radians - abs(theta)) / env.theta_threshold_radians - 0.5
+                # reward = r1 + r2
+                if done:
+                    reward = -10
+                else:
+                    reward = 1
 
                 # store [state, action, reward] collections
                 if state_collections.shape[1] == 0:

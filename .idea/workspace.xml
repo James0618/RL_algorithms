@@ -187,6 +187,7 @@
       <workItem from="1576814895015" duration="23554000" />
       <workItem from="1576891086761" duration="10826000" />
       <workItem from="1576913601293" duration="9958000" />
+      <workItem from="1577093338258" duration="11219000" />
     </task>
     <task id="LOCAL-00001" summary="PPO">
       <created>1576921982153</created>
@@ -220,7 +221,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/RL_algorithms$DDPG.coverage" NAME="DDPG Coverage Results" MODIFIED="1576484371478" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/RL_algorithms$PPO.coverage" NAME="PPO Coverage Results" MODIFIED="1576923139507" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$PPO.coverage" NAME="PPO Coverage Results" MODIFIED="1577106000846" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_algorithms$Actor_Critic.coverage" NAME="Actor_Critic Coverage Results" MODIFIED="1576754775501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DQN.coverage" NAME="DQN Coverage Results" MODIFIED="1576573587644" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
