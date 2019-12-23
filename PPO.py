@@ -41,7 +41,7 @@ class PolicyNet(nn.Module):
 
 
 class Model:
-    def __init__(self, n_state, n_action, gamma=0.95, learning_rate=0.005, epsilon=0.05):
+    def __init__(self, n_state, n_action, gamma=0.95, learning_rate=0.005, epsilon=0.1):
         # init networks
         self.policy = PolicyNet(n_state=n_state, n_action=n_action)
         self.old_policy = PolicyNet(n_state=n_state, n_action=n_action)
