@@ -34,7 +34,7 @@ class PolicyNet(nn.Module):
 
     def forward(self, state):
         actions = self.policy(state)
-        action_prob = torch.nn.functional.softmax(actions)
+        action_prob = torch.nn.functional.softmax(actions, dim=-1)
         # print('action_prob: ', action_prob)
         distribution = Categorical(action_prob)
         return distribution
