@@ -25,9 +25,9 @@ class PolicyNet(nn.Module):
     def __init__(self, n_state, n_action):
         super(PolicyNet, self).__init__()
         self.policy = nn.Sequential(
-            nn.Linear(n_state, 64),
+            nn.Linear(n_state, 128),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(128, 64),
             nn.ReLU(),
             nn.Linear(64, n_action),
         )
@@ -41,11 +41,14 @@ class PolicyNet(nn.Module):
 
 
 class Model:
-    def __init__(self, n_state, n_action, gamma=0.95, learning_rate=0.005, epsilon=0.1):
+    def __init__(self, n_state, n_action, learn=False, gamma=0.95, learning_rate=0.005, epsilon=0.1):
         # init networks
-        self.policy = PolicyNet(n_state=n_state, n_action=n_action)
+        if learn is True:
+            self.policy = PolicyNet(n_state=n_state, n_action=n_action)
+            self.state_value = ValueNet(n_state=n_state)
+        else:
+            self.load_net()
         self.old_policy = PolicyNet(n_state=n_state, n_action=n_action)
-        self.state_value = ValueNet(n_state=n_state)
 
         self.n_state = n_state
         self.n_action = n_action
@@ -138,14 +141,24 @@ class Model:
         action = self.policy.forward(state).sample()
         return action
 
+    def save_net(self):
+        torch.save(self.policy, 'params/ppo_policy.pkl')
+        torch.save(self.state_value, 'params/ppo_state_value.pkl')
+
+    def load_net(self):
+        self.policy = torch.load('params/ppo_policy.pkl')
+        self.state_value = torch.load('params/ppo_state_value.pkl')
+
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    model = Model(n_state=2*env.observation_space.shape[0], n_action=env.action_space.n, learning_rate=0.005)
+    LEARN = False
+    model = Model(n_state=2*env.observation_space.shape[0], learn=LEARN, n_action=env.action_space.n,
+                  learning_rate=0.005, epsilon=0.1)
     env.reset()
     BATCH_SIZE = 16
 
-    for episode in range(50000):
+    for episode in range(2000):
         observation = env.reset()
         state = observation
 
@@ -153,8 +166,8 @@ if __name__ == '__main__':
         state_collections = torch.FloatTensor([[]])
         action_collections = torch.FloatTensor([])
         reward_collections = torch.FloatTensor([])
-        for t in range(1000):
-            if episode > 40000:
+        for t in range(500):
+            if episode > 1500 or LEARN is False:
                 env.render()
             if t < 1:
                 observation, _, done, info = env.step(0)
@@ -165,13 +178,8 @@ if __name__ == '__main__':
                 observation, _, done, info = env.step(int(action))
 
                 x, x_dot, theta, theta_dot = observation
-                # use the reward as Morvan Zhou defined
-                # https://github.com/MorvanZhou/PyTorch-Tutorial/blob/master/tutorial-contents/405_DQN_Reinforcement_learning.py
-                # r1 = (env.x_threshold - abs(x)) / env.x_threshold - 0.8
-                # r2 = (env.theta_threshold_radians - abs(theta)) / env.theta_threshold_radians - 0.5
-                # reward = r1 + r2
                 if done:
-                    reward = -10
+                    reward = 0
                 else:
                     reward = 1
 
@@ -194,8 +202,9 @@ if __name__ == '__main__':
                 if t == 1000 - 1:
                     done = True
                 if t % BATCH_SIZE == 0:
-                    model.learn(state_collections=state_collections, action_collections=action_collections,
-                                reward_collections=reward_collections, final_state=torch.FloatTensor(state))
+                    if LEARN is True:
+                        model.learn(state_collections=state_collections, action_collections=action_collections,
+                                    reward_collections=reward_collections, final_state=torch.FloatTensor(state))
                     state_collections = torch.FloatTensor([[]])
                     action_collections = torch.FloatTensor([])
                     reward_collections = torch.FloatTensor([])
@@ -203,9 +212,12 @@ if __name__ == '__main__':
                         break
 
                 if done:
-                    model.learn(state_collections=state_collections, action_collections=action_collections,
-                                reward_collections=reward_collections, final_state=torch.FloatTensor(state))
+                    if LEARN is True:
+                        model.learn(state_collections=state_collections, action_collections=action_collections,
+                                    reward_collections=reward_collections, final_state=torch.FloatTensor(state))
                     print("Episode {}: finished after {} timesteps".format(episode, t + 1))
+                    if t > 450:
+                        model.save_net()
                     state_collections = torch.FloatTensor([[]])
                     action_collections = torch.FloatTensor([])
                     reward_collections = torch.FloatTensor([])

@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0109929d-eda2-402d-902a-496a2b95fc2c" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/DPPO.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PPO.py" beforeDir="false" afterPath="$PROJECT_DIR$/PPO.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/params/old_policy_net.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/params/old_policy_net.pkl" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -187,6 +190,7 @@
       <workItem from="1576913601293" duration="9958000" />
       <workItem from="1577093338258" duration="11302000" />
       <workItem from="1577106376863" duration="149000" />
+      <workItem from="1577514941673" duration="4696000" />
     </task>
     <task id="LOCAL-00001" summary="PPO">
       <created>1576921982153</created>
@@ -220,7 +224,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/RL_algorithms$DDPG.coverage" NAME="DDPG Coverage Results" MODIFIED="1576484371478" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/RL_algorithms$PPO.coverage" NAME="PPO Coverage Results" MODIFIED="1577106483418" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$PPO.coverage" NAME="PPO Coverage Results" MODIFIED="1577519580481" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_algorithms$Actor_Critic.coverage" NAME="Actor_Critic Coverage Results" MODIFIED="1576754775501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DQN.coverage" NAME="DQN Coverage Results" MODIFIED="1576573587644" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
