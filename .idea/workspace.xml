@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0109929d-eda2-402d-902a-496a2b95fc2c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/DPPO.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PPO.py" beforeDir="false" afterPath="$PROJECT_DIR$/PPO.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/params/old_policy_net.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/params/old_policy_net.pkl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DPPO.py" beforeDir="false" afterPath="$PROJECT_DIR$/DPPO.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -190,7 +188,7 @@
       <workItem from="1576913601293" duration="9958000" />
       <workItem from="1577093338258" duration="11302000" />
       <workItem from="1577106376863" duration="149000" />
-      <workItem from="1577514941673" duration="4696000" />
+      <workItem from="1577514941673" duration="4838000" />
     </task>
     <task id="LOCAL-00001" summary="PPO">
       <created>1576921982153</created>
