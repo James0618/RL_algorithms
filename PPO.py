@@ -81,13 +81,12 @@ class Model:
         idx = torch.LongTensor(idx)
         advantage_collections = advantage_collections.index_select(0, idx)
 
-        torch.save(self.policy.state_dict(), 'params/old_policy_net.pkl')
+        # torch.save(self.policy.state_dict(), 'params/old_policy_net.pkl')
         old_policy = PolicyNet(n_state=self.n_state, n_action=self.n_action)
-        old_policy.load_state_dict(torch.load('params/old_policy_net.pkl'))
+        old_policy.load_state_dict(self.policy.state_dict())
 
         policy_optimizer = torch.optim.SGD(params=self.policy.parameters(), lr=self.learning_rate)
         state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=2*self.learning_rate)
-        # loss_func = nn.KLDivLoss()
         for j in range(12):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
@@ -99,13 +98,6 @@ class Model:
                                                            advantage_collections.detach())
                                                  )
                                        )
-            # print(policy_loss)
-            # policy_loss = -(-self.lamb * loss_func(torch.log(old_policy.forward(state_collections).probs),
-            #                                            torch.log(self.policy.forward(state_collections).probs)) +
-            #                     torch.mean(torch.mul(
-            #                         torch.exp(self.policy.forward(state_collections).log_prob(action_collections) -
-            #                                   old_policy.forward(state_collections).log_prob(action_collections)),
-            #                         advantage_collections.detach())))
             policy_optimizer.zero_grad()
             policy_loss.backward(retain_graph=True)
             policy_optimizer.step()
@@ -127,15 +119,6 @@ class Model:
             state_loss.backward(retain_graph=True)
             state_value_optimizer.step()
 
-        # print(old_policy(state_collections).probs)
-        # if loss_func(torch.log(old_policy.forward(state_collections).probs),
-        #              torch.log(self.policy.forward(state_collections).probs)) > self.kl_target * 1.5:
-        #     self.lamb = self.lamb * 2
-        # elif loss_func(torch.log(old_policy.forward(state_collections).probs),
-        #                torch.log(self.policy.forward
-        #                              (state_collections).probs)) < self.kl_target / 1.5:
-        #     self.lamb = self.lamb / 2
-
     def choose_action(self, state):
         # print(self.policy.forward(state).probs)
         action = self.policy.forward(state).sample()
@@ -152,7 +135,7 @@ class Model:
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    LEARN = False
+    LEARN = True
     model = Model(n_state=2*env.observation_space.shape[0], learn=LEARN, n_action=env.action_space.n,
                   learning_rate=0.005, epsilon=0.1)
     env.reset()
