@@ -1,8 +1,10 @@
 import torch
-import torch.nn as nn
 import torch.multiprocessing as mp
 import numpy as np
 import gym
+from torch.distributions import Categorical
+from PPO import PolicyNet
+from DPPO.DPPO_learner import DPPO
 
 
 class Worker(mp.Process):
@@ -84,6 +86,8 @@ class Worker(mp.Process):
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
     LEARN = True
-    worker_number = int(mp.cpu_count() / 2)
+    NUMBER = int(mp.cpu_count() / 2)
     global_episode = mp.Value('i', 0)
+
+
     global_collections_queue = mp.Queue()
