@@ -49,7 +49,6 @@ class Model:
         else:
             self.load_net()
         self.old_policy = PolicyNet(n_state=n_state, n_action=n_action)
-
         self.n_state = n_state
         self.n_action = n_action
         self.gamma = gamma
@@ -132,8 +131,8 @@ class Model:
         self.policy = torch.load('params/ppo_policy.pkl')
         self.state_value = torch.load('params/ppo_state_value.pkl')
 
-    def replace_net(self, net):
-        self.policy.loaf_state_dict(net.state_dict())
+    def policy_net(self, net):
+        return self.policy.state_dict()
 
 
 if __name__ == '__main__':

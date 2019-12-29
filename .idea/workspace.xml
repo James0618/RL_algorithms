@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0109929d-eda2-402d-902a-496a2b95fc2c" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/james.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DPPO_learner.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DPPO.py" beforeDir="false" afterPath="$PROJECT_DIR$/DPPO.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PPO.py" beforeDir="false" afterPath="$PROJECT_DIR$/PPO.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -191,7 +194,7 @@
       <workItem from="1577514941673" duration="5267000" />
       <workItem from="1577530877348" duration="7784000" />
       <workItem from="1577583793715" duration="1488000" />
-      <workItem from="1577585478567" duration="1240000" />
+      <workItem from="1577585478567" duration="5447000" />
     </task>
     <task id="LOCAL-00001" summary="PPO">
       <created>1576921982153</created>
