@@ -3,39 +3,6 @@ import torch.nn as nn
 import torch.multiprocessing as mp
 import numpy as np
 import gym
-from torch.distributions import Categorical
-
-
-class DPPO(nn.Module):
-    def __init__(self, n_state, n_action):
-        super(DPPO, self).__init__()
-        self.state_value = nn.Sequential(
-            nn.Linear(n_state, 64),
-            nn.ReLU(),
-            nn.Linear(64, 64),
-            nn.ReLU(),
-            nn.Linear(64, 1),
-        )
-        self.policy = nn.Sequential(
-            nn.Linear(n_state, 128),
-            nn.ReLU(),
-            nn.Linear(128, 64),
-            nn.ReLU(),
-            nn.Linear(64, n_action),
-        )
-
-    def forward(self, state):
-        action_values = self.state_value(state)
-        actions = self.policy(state)
-        action_prob = torch.nn.functional.softmax(actions, dim=-1)
-        # print('action_prob: ', action_prob)
-        distribution = Categorical(action_prob)
-        return action_values, distribution
-
-    def choose_action(self, state):
-        self.eval()
-        _, distribution = self.forward(state)
-        return distribution.sample()
 
 
 class Worker(mp.Process):
