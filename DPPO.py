@@ -4,7 +4,7 @@ import numpy as np
 import gym
 from torch.distributions import Categorical
 from PPO import PolicyNet
-from DPPO.DPPO_learner import DPPO
+from DPPO.DPPO_learner import Agent
 
 
 class Worker(mp.Process):
@@ -88,6 +88,7 @@ if __name__ == '__main__':
     LEARN = True
     NUMBER = int(mp.cpu_count() / 2)
     global_episode = mp.Value('i', 0)
-
+    policy = PolicyNet(n_state=2*env.observation_space.shape[0], n_action=env.action_space.n)
+    policy.share_memory()
 
     global_collections_queue = mp.Queue()

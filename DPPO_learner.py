@@ -3,10 +3,10 @@ import torch.multiprocessing as mp
 from PPO import PolicyNet, ValueNet
 
 
-class DPPO(mp.Process):
+class Agent(mp.Process):
     def __init__(self, policy, n_state, n_action, state_queue, action_queue, reward_queue, final_queue, global_episode,
                  learn=False, gamma=0.95, learning_rate=0.005, epsilon=0.1):
-        super(DPPO, self).__init__()
+        super(Agent, self).__init__()
 
         if learn is True:
             self.policy = policy
