@@ -4,10 +4,6 @@
     <list default="true" id="0109929d-eda2-402d-902a-496a2b95fc2c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DPPO.py" beforeDir="false" afterPath="$PROJECT_DIR$/DPPO.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PPO.py" beforeDir="false" afterPath="$PROJECT_DIR$/PPO.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/params/old_policy_net.pkl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/params/ppo_policy.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/params/ppo_policy.pkl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/params/ppo_state_value.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/params/ppo_state_value.pkl" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -193,7 +189,9 @@
       <workItem from="1577093338258" duration="11302000" />
       <workItem from="1577106376863" duration="149000" />
       <workItem from="1577514941673" duration="5267000" />
-      <workItem from="1577530877348" duration="7757000" />
+      <workItem from="1577530877348" duration="7784000" />
+      <workItem from="1577583793715" duration="1488000" />
+      <workItem from="1577585478567" duration="582000" />
     </task>
     <task id="LOCAL-00001" summary="PPO">
       <created>1576921982153</created>
