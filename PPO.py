@@ -132,6 +132,9 @@ class Model:
         self.policy = torch.load('params/ppo_policy.pkl')
         self.state_value = torch.load('params/ppo_state_value.pkl')
 
+    def replace_net(self, net):
+        self.policy.loaf_state_dict(net.state_dict())
+
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
