@@ -92,7 +92,7 @@ class Agent(mp.Process):
             state_value_optimizer.step()
 
     def run(self):
-        while self.global_episode < self.MAX_EPISODE:
+        while self.global_episode.value < self.MAX_EPISODE:
             state_collections = self.state_queue.get()
             action_collections = self.action_queue.get()
             reward_collections = self.reward_queue.get()
