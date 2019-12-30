@@ -4,28 +4,28 @@ from PPO import PolicyNet, ValueNet
 
 
 class Agent(mp.Process):
-    def __init__(self, policy, n_state, n_action, state_queue, action_queue, reward_queue, final_queue, global_episode,
-                 learn=False, gamma=0.95, learning_rate=0.005, epsilon=0.1):
+    def __init__(self, policy, n_state, n_action, queue, global_episode, learn=True,
+                 gamma=0.95, learning_rate=0.005, epsilon=0.1):
         super(Agent, self).__init__()
 
         if learn is True:
             self.policy = policy
             self.state_value = ValueNet(n_state=n_state)
         else:
+            self.policy = policy
             self.load_net()
         self.old_policy = PolicyNet(n_state=n_state, n_action=n_action)
 
-        self.state_queue = state_queue
-        self.action_queue = action_queue
-        self.reward_queue = reward_queue
-        self.final_queue = final_queue
+        self.queue = queue
         self.global_episode = global_episode
-        self.MAX_EPISODE = 3000
+        self.MAX_EPISODE = 30000
 
         self.n_state = n_state
+        self.n_action = n_action
         self.gamma = gamma
         self.learning_rate = learning_rate
         self.epsilon = epsilon
+        self.LEARN = learn
 
     def learn(self, state_collections, action_collections, reward_collections, final_state):
         T = state_collections.shape[0]
@@ -54,7 +54,7 @@ class Agent(mp.Process):
         old_policy.load_state_dict(self.policy.state_dict())
 
         policy_optimizer = torch.optim.SGD(params=self.policy.parameters(), lr=self.learning_rate)
-        state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=2 * self.learning_rate)
+        state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=2*self.learning_rate)
 
         # update policy net
         for j in range(12):
@@ -93,15 +93,18 @@ class Agent(mp.Process):
 
     def run(self):
         while self.global_episode.value < self.MAX_EPISODE:
-            state_collections = self.state_queue.get()
-            action_collections = self.action_queue.get()
-            reward_collections = self.reward_queue.get()
-            final_state = self.final_queue.get()
-            self.learn(state_collections=state_collections, action_collections=action_collections,
-                       reward_collections=reward_collections, final_state=final_state)
+            collections = self.queue.get()
+            state_collections = collections[0]
+            action_collections = collections[1]
+            reward_collections = collections[2]
+            final_state = collections[3]
+            if self.LEARN is True:
+                self.learn(state_collections=state_collections, action_collections=action_collections,
+                           reward_collections=reward_collections, final_state=final_state)
 
     def load_net(self):
-        self.policy = torch.load('params/ppo_policy.pkl')
+        policy = torch.load('params/ppo_policy.pkl')
+        self.policy.load_state_dict(policy.state_dict())
         self.state_value = torch.load('params/ppo_state_value.pkl')
 
 
