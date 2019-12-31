@@ -13,19 +13,28 @@ class Network(nn.Module):
         self.n_state = n_state
         self.n_action = n_action
         # model init
-        self.lstm_layer = nn.LSTM(input_size=n_state, hidden_size=n_action)
+        self.lstm_layer = nn.LSTM(input_size=n_state, hidden_size=n_state, num_layers=self.num_layers)
+        self.hidden2action = nn.Sequential(
+            nn.Linear(n_state, 64),
+            nn.ReLU(),
+            nn.Linear(64, 64),
+            nn.ReLU(),
+            nn.Linear(64, n_action),
+        )
 
     def forward(self, state):
         batch_size = state.shape[0]
         state_lstm = state.unsqueeze(0)
-        h0 = torch.FloatTensor(torch.randn(self.num_layers, batch_size, self.n_action))
-        c0 = torch.FloatTensor(torch.randn(self.num_layers, batch_size, self.n_action))
-        output, hn = self.lstm_layer(state_lstm, (h0, c0))
-        return output.squeeze()
+        # h0 = torch.FloatTensor(torch.randn(self.num_layers, batch_size, self.n_state))
+        # c0 = torch.FloatTensor(torch.randn(self.num_layers, batch_size, self.n_state))
+        output, _ = self.lstm_layer(state_lstm)
+        out = output.squeeze()
+        action_values = self.hidden2action(out)
+        return action_values
 
 
 class DQN:
-    def __init__(self, n_replay, n_state, n_action, learn=True, learning_rate=0.1, gamma=0.95, epsilon=0.1):
+    def __init__(self, n_replay, n_state, n_action, learn=True, learning_rate=0.005, gamma=0.95, epsilon=0.1):
         # parameters init
         self.n_replay = n_replay
         self.n_state = n_state
@@ -55,7 +64,8 @@ class DQN:
         if random.random() < self.epsilon:
             action = np.random.randint(self.n_action)
         else:
-            action = self.q_net.forward(state_tensor).max(0)[1]
+            # action = self.q_net.forward(state_tensor).max(0)[1]
+            action = torch.argmax(self.q_net.forward(state_tensor))
             # print(action)
         return int(action)
 
@@ -119,16 +129,16 @@ class DQN:
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
     LEARN = True
-    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.005, learn=LEARN)
+    agent = DQN(n_replay=10000, n_action=2, n_state=4, learning_rate=0.01, learn=LEARN)
 
     env.reset()
-    for episode in range(5000):
+    for episode in range(50000):
         observation = env.reset()
         state = observation
         reward = 0
         for t in range(500):
-            if episode > 3000 or LEARN is False:
-                env.render()
+            # if episode > 3000 or LEARN is False:
+            #     env.render()
             state_before = state
             action = agent.choose_action(state)
             observation, _, done, info = env.step(action)
@@ -136,9 +146,13 @@ if __name__ == '__main__':
             x, x_dot, theta, theta_dot = observation
             # use the reward as Morvan Zhou defined
             # https://github.com/MorvanZhou/PyTorch-Tutorial/blob/master/tutorial-contents/405_DQN_Reinforcement_learning.py
-            r1 = (env.x_threshold - abs(x)) / env.x_threshold - 0.8
-            r2 = (env.theta_threshold_radians - abs(theta)) / env.theta_threshold_radians - 0.5
-            reward = r1 + r2
+            # r1 = (env.x_threshold - abs(x)) / env.x_threshold - 0.8
+            # r2 = (env.theta_threshold_radians - abs(theta)) / env.theta_threshold_radians - 0.5
+            # reward = r1 + r2
+            if done:
+                reward = 0
+            else:
+                reward = 1
 
             state = observation
             if done:
@@ -148,7 +162,7 @@ if __name__ == '__main__':
 
             # learn when replay has enough transitions
             if episode >= 5:
-                if t % 3 == 0 and LEARN is True:
+                if t % 2 == 0 and LEARN is True:
                     agent.learn()
 
             # save success params
