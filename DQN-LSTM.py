@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.autograd import Variable
 import numpy as np
 import random
 import gym
@@ -8,27 +9,29 @@ import gym
 class Network(nn.Module):
     def __init__(self, n_state, n_action):
         super(Network, self).__init__()
+        self.num_layers = 1
+        self.n_state = n_state
+        self.n_action = n_action
         # model init
-        self.q_net = nn.Sequential(
-            nn.Linear(n_state, 64),
-            nn.ReLU(),
-            nn.Linear(64, 64),
-            nn.ReLU(),
-            nn.Linear(64, n_action),
-        )
+        self.lstm_layer = nn.LSTM(input_size=n_state, hidden_size=n_action)
 
     def forward(self, state):
-        return self.q_net(state)
+        batch_size = state.shape[0]
+        state_lstm = state.unsqueeze(0)
+        h0 = torch.FloatTensor(torch.randn(self.num_layers, batch_size, self.n_action))
+        c0 = torch.FloatTensor(torch.randn(self.num_layers, batch_size, self.n_action))
+        output, hn = self.lstm_layer(state_lstm, (h0, c0))
+        return output.squeeze()
 
 
 class DQN:
-    def __init__(self, n_replay, n_state, n_action, load_param=False, learning_rate=0.1, gamma=0.95, epsilon=0.1):
+    def __init__(self, n_replay, n_state, n_action, learn=True, learning_rate=0.1, gamma=0.95, epsilon=0.1):
         # parameters init
         self.n_replay = n_replay
         self.n_state = n_state
         self.n_action = n_action
 
-        if load_param is True:
+        if learn is False:
             self.load_net()
         else:
             self.q_net = Network(n_state=self.n_state, n_action=self.n_action)
@@ -52,7 +55,7 @@ class DQN:
         if random.random() < self.epsilon:
             action = np.random.randint(self.n_action)
         else:
-            action = self.q_net.forward(state_tensor).max(1)[1]
+            action = self.q_net.forward(state_tensor).max(0)[1]
             # print(action)
         return int(action)
 
@@ -115,8 +118,8 @@ class DQN:
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.005, load_param=True)
     LEARN = True
+    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.005, learn=LEARN)
 
     env.reset()
     for episode in range(5000):

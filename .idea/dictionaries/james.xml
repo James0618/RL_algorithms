@@ -2,6 +2,7 @@
   <dictionary name="james">
     <words>
       <w>dppo</w>
+      <w>lstm</w>
     </words>
   </dictionary>
 </component>
