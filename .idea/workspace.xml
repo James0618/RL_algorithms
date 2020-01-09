@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0109929d-eda2-402d-902a-496a2b95fc2c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/DQN-GPU.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/james.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/james.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Complex_environment/Atari.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sources/DQN.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/params/dqn.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/params/dqn.pkl" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -204,6 +203,7 @@
       <workItem from="1577703278028" duration="5620000" />
       <workItem from="1577759722297" duration="12787000" />
       <workItem from="1578555763286" duration="1759000" />
+      <workItem from="1578577979604" duration="1141000" />
     </task>
     <task id="LOCAL-00001" summary="PPO">
       <created>1576921982153</created>
