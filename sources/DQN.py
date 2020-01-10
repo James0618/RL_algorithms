@@ -52,15 +52,27 @@ class DQN:
             transitions = random.sample(self.replay, self.batch_size)
 
         # extract data in mini-batch
-        data_array = np.array(transitions, dtype=float)
-        data_state = torch.from_numpy(data_array[:, 0:self.n_state]).float()
-        data_action = torch.from_numpy(data_array[:, self.n_state:self.n_state+1]).long()
-        data_reward = torch.from_numpy(data_array[:, self.n_state+1:self.n_state+2]).float()
-        data_state_ = torch.from_numpy(data_array[:, -self.n_state:]).float()
+        # transition: state -> action -> reward -> state'
+        #             state & state' - FloatTensor
+        #             action - int
+        #             reward - float
+        # data_state & data_state_ - [N_Batch, state_size]
+        # action & reward -[N_Batch, 1]
+        for index, transition in enumerate(transitions):
+            if index == 0:
+                data_state = transition[0].unsqueeze(0)
+                data_action = transition[1].unsqueeze(0)
+                data_reward = transition[2].unsqueeze(0)
+                data_state_ = transition[3].unsqueeze(0)
+            else:
+                data_state = torch.cat((data_state, transition[0].unsqueeze(0)), dim=0)
+                data_action = torch.cat((data_action, transition[1].unsqueeze(0)), dim=0)
+                data_reward = torch.cat((data_reward, transition[1].unsqueeze(0)), dim=0)
+                data_state_ = torch.cat((data_state_, transition[0].unsqueeze(0)), dim=0)
 
         # calculate q_current and q_next
-        q_value = self.q_net(data_state).gather(1, data_action)
-        q_next = self.q_net(data_state_).max(1)[0].view(len(transitions), 1)
+        q_value = self.q_net.forward(data_state).gather(1, data_action)
+        q_next = self.q_net.forward(data_state_).max(1)[0].view(len(transitions), 1)
         target = data_reward + self.gamma * q_next
         # print('q_value, q_next, target: ', q_value, q_next, target)
         loss = self.loss_func(input=q_value, target=target)
@@ -96,46 +108,3 @@ class DQN:
 
     def load_net(self):
         self.q_net = torch.load('params/dqn.pkl')
-
-
-if __name__ == '__main__':
-    env = gym.make('CartPole-v1')
-    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.005, load_param=True)
-    LEARN = False
-
-    env.reset()
-    for episode in range(5000):
-        observation = env.reset()
-        state = observation
-        reward = 0
-        for t in range(500):
-            if episode > 3000 or LEARN is False:
-                env.render()
-            state_before = state
-            action = agent.choose_action(state)
-            observation, _, done, info = env.step(action)
-
-            x, x_dot, theta, theta_dot = observation
-            # use the reward as Morvan Zhou defined
-            # https://github.com/MorvanZhou/PyTorch-Tutorial/blob/master/tutorial-contents/405_DQN_Reinforcement_learning.py
-            r1 = (env.x_threshold - abs(x)) / env.x_threshold - 0.8
-            r2 = (env.theta_threshold_radians - abs(theta)) / env.theta_threshold_radians - 0.5
-            reward = r1 + r2
-
-            state = observation
-            if done:
-                print("Episode {}: finished after {} timesteps".format(episode, t+1))
-                break
-            agent.store_transition(state.tolist() + [action] + [reward] + state_before.tolist())
-
-            # learn when replay has enough transitions
-            if episode >= 5:
-                if t % 3 == 0 and LEARN is True:
-                    agent.learn()
-
-            # save success params
-            if t > 400:
-                if episode % 20 == 0:
-                    agent.save_net()
-
-    env.close()

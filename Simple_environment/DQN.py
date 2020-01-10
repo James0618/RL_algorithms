@@ -115,8 +115,8 @@ class DQN:
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.005, load_param=True)
-    LEARN = False
+    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.005, load_param=False)
+    LEARN = True
 
     env.reset()
     for episode in range(5000):
