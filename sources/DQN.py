@@ -6,14 +6,14 @@ import gym
 
 
 class DQN:
-    def __init__(self, network, n_replay, n_state, n_action, load_param=False, learning_rate=0.005, gamma=0.95,
+    def __init__(self, network, n_replay, n_state, n_action, learn=True, learning_rate=0.005, gamma=0.95,
                  epsilon=0.1):
         # parameters init
         self.n_replay = n_replay
         self.n_state = n_state
         self.n_action = n_action
 
-        if load_param is True:
+        if learn is False:
             self.load_net()
         else:
             self.q_net = network(n_state=self.n_state, n_action=self.n_action)

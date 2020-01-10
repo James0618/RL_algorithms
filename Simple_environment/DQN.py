@@ -141,7 +141,7 @@ if __name__ == '__main__':
             if done:
                 print("Episode {}: finished after {} timesteps".format(episode, t+1))
                 break
-            agent.store_transition(state.tolist() + [action] + [reward] + state_before.tolist())
+            agent.store_transition(state_before.tolist() + [action] + [reward] + state.tolist())
 
             # learn when replay has enough transitions
             if episode >= 5:
