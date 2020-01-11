@@ -12,9 +12,11 @@ class Network(nn.Module):
         self.q_net = nn.Sequential(
             nn.Linear(n_state, 64),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(64, 128),
             nn.ReLU(),
-            nn.Linear(64, n_action),
+            nn.Linear(128, 32),
+            nn.ReLU(),
+            nn.Linear(32, n_action),
         )
 
     def forward(self, state):
@@ -36,13 +38,13 @@ class DQN:
 
         self.device = device
         self.q_net.to(self.device)
-        self.optimizer = torch.optim.SGD(self.q_net.parameters(), lr=learning_rate)
+        self.optimizer = torch.optim.ASGD(self.q_net.parameters(), lr=learning_rate)
         self.loss_func = nn.MSELoss()
 
         self.lr = learning_rate
         self.gamma = gamma
         self.epsilon = epsilon
-        self.batch_size = 32
+        self.batch_size = 64
 
         # replay init
         self.replay = []
@@ -111,16 +113,16 @@ class DQN:
             self.replay[self.pointer] = transition
 
     def save_net(self):
-        torch.save(self.q_net, 'params/dqn.pkl')
+        torch.save(self.q_net, 'params/dqn-gpu.pkl')
 
     def load_net(self):
-        self.q_net = torch.load('params/dqn.pkl')
+        self.q_net = torch.load('params/dqn-gpu.pkl')
 
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
     device = torch.device("cuda:0")
-    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.005, load_param=False, device=device)
+    agent = DQN(n_replay=10000, n_action=2, n_state=4, learning_rate=0.001, gamma=0.99, load_param=False, device=device)
     LEARN = True
 
     env.reset()
@@ -129,7 +131,7 @@ if __name__ == '__main__':
         state = observation
         reward = 0
         for t in range(500):
-            if episode > 30000 or LEARN is False:
+            if LEARN is False:
                 env.render()
             state_before = state
             action = agent.choose_action(state)
@@ -138,13 +140,9 @@ if __name__ == '__main__':
             x, x_dot, theta, theta_dot = observation
             # use the reward as Morvan Zhou defined
             # https://github.com/MorvanZhou/PyTorch-Tutorial/blob/master/tutorial-contents/405_DQN_Reinforcement_learning.py
-            # r1 = (env.x_threshold - abs(x)) / env.x_threshold - 0.8
-            # r2 = (env.theta_threshold_radians - abs(theta)) / env.theta_threshold_radians - 0.5
-            # reward = r1 + r2
-            if done:
-                reward = 0
-            else:
-                reward = 1
+            r1 = (env.x_threshold - abs(x)) / env.x_threshold - 0.8
+            r2 = (env.theta_threshold_radians - abs(theta)) / env.theta_threshold_radians - 0.5
+            reward = r1 + r2
 
             state = observation
             if done:
@@ -154,7 +152,7 @@ if __name__ == '__main__':
 
             # learn when replay has enough transitions
             if episode >= 5:
-                if t % 3 == 0 and LEARN is True:
+                if t % 2 == 0 and LEARN is True:
                     agent.learn()
 
             # save success params
