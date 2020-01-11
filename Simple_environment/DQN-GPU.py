@@ -122,8 +122,8 @@ class DQN:
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
     device = torch.device("cuda:0")
-    agent = DQN(n_replay=10000, n_action=2, n_state=4, learning_rate=0.001, gamma=0.99, load_param=False, device=device)
-    LEARN = True
+    agent = DQN(n_replay=10000, n_action=2, n_state=4, learning_rate=0.001, gamma=0.99, load_param=True, device=device)
+    LEARN = False
 
     env.reset()
     for episode in range(50000):
