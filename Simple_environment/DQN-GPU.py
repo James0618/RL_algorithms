@@ -42,7 +42,7 @@ class DQN:
         self.lr = learning_rate
         self.gamma = gamma
         self.epsilon = epsilon
-        self.batch_size = 64
+        self.batch_size = 32
 
         # replay init
         self.replay = []
@@ -106,6 +106,7 @@ class DQN:
                 self.replay[self.pointer] = transition
             self.pointer += 1
         else:
+            self.full = True
             self.pointer = 0
             self.replay[self.pointer] = transition
 

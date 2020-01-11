@@ -6,17 +6,16 @@ import gym
 
 
 class DQN:
-    def __init__(self, network, n_replay, n_state, n_action, learn=True, learning_rate=0.005, gamma=0.95,
-                 epsilon=0.1):
+    def __init__(self, network, device, n_replay, n_action, learn=True, learning_rate=0.005, gamma=0.95, epsilon=0.1):
         # parameters init
         self.n_replay = n_replay
-        self.n_state = n_state
         self.n_action = n_action
+        self.device = device
 
         if learn is False:
             self.load_net()
         else:
-            self.q_net = network(n_state=self.n_state, n_action=self.n_action)
+            self.q_net = network
 
         self.optimizer = torch.optim.SGD(self.q_net.parameters(), lr=learning_rate)
         self.loss_func = nn.MSELoss()
@@ -24,7 +23,7 @@ class DQN:
         self.lr = learning_rate
         self.gamma = gamma
         self.epsilon = epsilon
-        self.batch_size = 64
+        self.batch_size = 16
 
         # replay init
         self.replay = []
@@ -32,7 +31,7 @@ class DQN:
         self.pointer = 0
 
     def choose_action(self, state):
-        state_tensor = torch.FloatTensor([state])
+        state_tensor = torch.FloatTensor(state).to(device=self.device)
         # epsilon-argmax
         if random.random() < self.epsilon:
             action = np.random.randint(self.n_action)
@@ -60,15 +59,20 @@ class DQN:
         # action & reward -[N_Batch, 1]
         for index, transition in enumerate(transitions):
             if index == 0:
-                data_state = transition[0].unsqueeze(0)
-                data_action = transition[1].unsqueeze(0)
-                data_reward = transition[2].unsqueeze(0)
-                data_state_ = transition[3].unsqueeze(0)
+                data_state = transition[0]
+                data_action = torch.LongTensor([transition[1]]).unsqueeze(0)
+                data_reward = torch.FloatTensor([transition[2]]).unsqueeze(0)
+                data_state_ = transition[3]
             else:
-                data_state = torch.cat((data_state, transition[0].unsqueeze(0)), dim=0)
-                data_action = torch.cat((data_action, transition[1].unsqueeze(0)), dim=0)
-                data_reward = torch.cat((data_reward, transition[1].unsqueeze(0)), dim=0)
-                data_state_ = torch.cat((data_state_, transition[0].unsqueeze(0)), dim=0)
+                data_state = torch.cat((data_state, transition[0]), dim=0)
+                data_action = torch.cat((data_action, torch.LongTensor([transition[1]]).unsqueeze(0)), dim=0)
+                data_reward = torch.cat((data_reward, torch.FloatTensor([transition[2]]).unsqueeze(0)), dim=0)
+                data_state_ = torch.cat((data_state_, transition[3]), dim=0)
+
+        data_state = data_state.to(device=self.device)
+        data_action = data_action.to(device=self.device)
+        data_reward = data_reward.to(device=self.device)
+        data_state_ = data_state_.to(device=self.device)
 
         # calculate q_current and q_next
         q_value = self.q_net.forward(data_state).gather(1, data_action)
@@ -80,10 +84,6 @@ class DQN:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        # print('###################################')
-        # for name, param in self.q_net.named_parameters():
-        #     if param.requires_grad:
-        #         print(param)
 
     # replay space
     def store_transition(self, transition):
@@ -100,6 +100,7 @@ class DQN:
                 self.replay[self.pointer] = transition
             self.pointer += 1
         else:
+            self.full = True
             self.pointer = 0
             self.replay[self.pointer] = transition
 

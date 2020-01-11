@@ -12,9 +12,11 @@ class Network(nn.Module):
         self.q_net = nn.Sequential(
             nn.Linear(n_state, 64),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(64, 128),
             nn.ReLU(),
-            nn.Linear(64, n_action),
+            nn.Linear(128, 32),
+            nn.ReLU(),
+            nn.Linear(32, n_action),
         )
 
     def forward(self, state):
@@ -22,7 +24,7 @@ class Network(nn.Module):
 
 
 class DQN:
-    def __init__(self, n_replay, n_state, n_action, load_param=False, learning_rate=0.1, gamma=0.95, epsilon=0.1):
+    def __init__(self, n_replay, n_state, n_action, load_param=False, learning_rate=0.005, gamma=0.95, epsilon=0.05):
         # parameters init
         self.n_replay = n_replay
         self.n_state = n_state
@@ -33,7 +35,7 @@ class DQN:
         else:
             self.q_net = Network(n_state=self.n_state, n_action=self.n_action)
 
-        self.optimizer = torch.optim.SGD(self.q_net.parameters(), lr=learning_rate)
+        self.optimizer = torch.optim.ASGD(self.q_net.parameters(), lr=learning_rate)
         self.loss_func = nn.MSELoss()
 
         self.lr = learning_rate
@@ -103,6 +105,7 @@ class DQN:
                 self.replay[self.pointer] = transition
             self.pointer += 1
         else:
+            self.full = True
             self.pointer = 0
             self.replay[self.pointer] = transition
 
@@ -115,16 +118,16 @@ class DQN:
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    agent = DQN(n_replay=5000, n_action=2, n_state=4, learning_rate=0.005, load_param=False)
+    agent = DQN(n_replay=10000, n_action=2, n_state=4, learning_rate=0.001, load_param=False)
     LEARN = True
 
     env.reset()
-    for episode in range(5000):
+    for episode in range(100000):
         observation = env.reset()
         state = observation
         reward = 0
         for t in range(500):
-            if episode > 3000 or LEARN is False:
+            if LEARN is False:
                 env.render()
             state_before = state
             action = agent.choose_action(state)
@@ -145,7 +148,7 @@ if __name__ == '__main__':
 
             # learn when replay has enough transitions
             if episode >= 5:
-                if t % 3 == 0 and LEARN is True:
+                if t % 2 == 0 and LEARN is True:
                     agent.learn()
 
             # save success params

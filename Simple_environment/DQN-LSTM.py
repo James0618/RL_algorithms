@@ -17,9 +17,9 @@ class Network(nn.Module):
         self.hidden2action = nn.Sequential(
             nn.Linear(n_state, 64),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(64, n_action),
+            nn.Linear(32, n_action),
         )
 
     def forward(self, state):
@@ -116,6 +116,7 @@ class DQN:
                 self.replay[self.pointer] = transition
             self.pointer += 1
         else:
+            self.full = True
             self.pointer = 0
             self.replay[self.pointer] = transition
 
@@ -129,7 +130,7 @@ class DQN:
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
     LEARN = True
-    agent = DQN(n_replay=10000, n_action=2, n_state=4, learning_rate=0.01, learn=LEARN)
+    agent = DQN(n_replay=10000, n_action=2, n_state=4, learning_rate=0.005, learn=LEARN)
 
     env.reset()
     for episode in range(50000):
