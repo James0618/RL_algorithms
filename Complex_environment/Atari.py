@@ -44,44 +44,45 @@ class Network(nn.Module):
 def preprocess(ob):
     ob = cv2.cvtColor(cv2.resize(ob, (84, 110)), cv2.COLOR_BGR2GRAY)
     ob = ob[26:110, :]
-    ret, ob = cv2.threshold(ob, 1, 255, cv2.THRESH_BINARY)
+    # ret, ob = cv2.threshold(ob, 1, 255, cv2.THRESH_BINARY)
     return np.reshape(ob, (84, 84, 1))
 
 
 if __name__ == '__main__':
     # env = gym.make("SpaceInvaders-v0")
-    env = wrappers.make_atari("SpaceInvaders-v0", 500)
+    env = wrappers.make_atari("SpaceInvaders-v0", max_episode_steps=600, max_and_skip=True)
+    env = wrappers.wrap_deepmind(env)
     LEARN = True
     net = Network(env.action_space.n)
     device = torch.device("cuda:0")
     net = net.to(device)
-    agent = DQN.DQN(network=net, device=device, n_replay=10000, n_action=env.action_space.n, learning_rate=0.001,
-                    epsilon=0.15, learn=LEARN)
+    agent = DQN.DQN(network=net, device=device, n_replay=25000, n_action=env.action_space.n, learning_rate=0.001,
+                    epsilon=0.1, learn=LEARN)
     observation = env.reset()
     observation = transforms.ToTensor()(observation).unsqueeze(0)
     env.reset()
-
-    for episode in range(2000):
+    reward_array = np.array([])
+    for episode in range(10000):
         observation = env.reset()
-        observation = preprocess(observation)
+        # observation = preprocess(observation)
         observation = transforms.ToTensor()(observation).unsqueeze(0)
         state = observation
         total_reward = 0
         for t in range(1000):
-            if episode > 0 or LEARN is False:
+            if LEARN is False:
                 env.render()
             if t < 3:
-                observation, reward, done, info = env.step(0)
-                observation = preprocess(observation)
-                observation = transforms.ToTensor()(observation).unsqueeze(0)   # 1*1*210*160
-                state = torch.cat((state, observation), dim=1)                  # 1*4*210*160
+                observation, reward, done, info = env.step(env.action_space.sample())
+                # observation = preprocess(observation)
+                observation = transforms.ToTensor()(observation).unsqueeze(0)   # 1*1*84*84
+                state = torch.cat((state, observation), dim=1)                  # 1*4*84*84
                 total_reward += reward
             else:
                 state_before = state
                 action = agent.choose_action(state)
                 # print('action: {}'.format(action))
                 observation, reward, done, info = env.step(int(action))
-                observation = preprocess(observation)
+                # observation = preprocess(observation)
                 observation = transforms.ToTensor()(observation).unsqueeze(0)
                 indices = torch.LongTensor([1, 2, 3])
                 state = torch.cat((torch.index_select(state, 1, indices), observation), dim=1)  # generate next state
@@ -93,15 +94,16 @@ if __name__ == '__main__':
                 agent.store_transition(transition=transition)
                 if done:
                     print("Episode {}: Reward -> {} after {} steps".format(episode, total_reward, t+1))
-                    print("left lives: {}".format(info))
+                    print("        left lives: {}".format(info["ale.lives"]))
+                    reward_array = np.append(reward_array, np.array([total_reward]))
+                    np.save('params/result-atari.npy', reward_array)
                     break
 
                 # learn when replay has enough transitions
-                if episode >= 3:
+                if episode >= 10:
                     if t % 20 == 0 and LEARN is True:
                         agent.learn()
 
                 # save success params
-                if t > 400:
-                    if episode % 20 == 0:
-                        agent.save_net()
+                if total_reward > 15:
+                    agent.save_net("dqn-atari")

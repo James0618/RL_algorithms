@@ -13,17 +13,18 @@ class DQN:
         self.device = device
 
         if learn is False:
-            self.load_net()
+            self.load_net('dqn-atari')
         else:
             self.q_net = network
 
-        self.optimizer = torch.optim.SGD(self.q_net.parameters(), lr=learning_rate)
+        self.optimizer = torch.optim.RMSprop(self.q_net.parameters(), lr=learning_rate)
         self.loss_func = nn.MSELoss()
 
         self.lr = learning_rate
         self.gamma = gamma
         self.epsilon = epsilon
-        self.batch_size = 16
+        self.times = 0
+        self.batch_size = 32
 
         # replay init
         self.replay = []
@@ -32,8 +33,13 @@ class DQN:
 
     def choose_action(self, state):
         state_tensor = torch.FloatTensor(state).to(device=self.device)
+        self.times += 1
+        if self.times < 1e6:
+            epsilon = (((self.epsilon - 1) * self.times) / 1e6) + 1
+        else:
+            epsilon = self.epsilon
         # epsilon-argmax
-        if random.random() < self.epsilon:
+        if random.random() < epsilon:
             action = np.random.randint(self.n_action)
         else:
             action = self.q_net.forward(state_tensor).max(1)[1]
@@ -104,8 +110,8 @@ class DQN:
             self.pointer = 0
             self.replay[self.pointer] = transition
 
-    def save_net(self):
-        torch.save(self.q_net, 'params/dqn.pkl')
+    def save_net(self, name):
+        torch.save(self.q_net, 'params/{}.pkl'.format(name))
 
-    def load_net(self):
-        self.q_net = torch.load('params/dqn.pkl')
+    def load_net(self, name):
+        self.q_net = torch.load('params/{}.pkl'.format(name))
