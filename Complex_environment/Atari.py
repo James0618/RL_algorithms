@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 import gym
+import time
 import cv2
 import numpy as np
 import common.atari_wrappers as wrappers
@@ -52,17 +53,17 @@ if __name__ == '__main__':
     # env = gym.make("SpaceInvaders-v0")
     env = wrappers.make_atari("SpaceInvaders-v0", max_episode_steps=600, max_and_skip=True)
     env = wrappers.wrap_deepmind(env)
-    LEARN = True
+    LEARN = False
     net = Network(env.action_space.n)
     device = torch.device("cuda:0")
     net = net.to(device)
-    agent = DQN.DQN(network=net, device=device, n_replay=25000, n_action=env.action_space.n, learning_rate=0.001,
+    agent = DQN.DQN(network=net, device=device, n_replay=16000, n_action=env.action_space.n, learning_rate=0.001,
                     epsilon=0.1, learn=LEARN)
     observation = env.reset()
     observation = transforms.ToTensor()(observation).unsqueeze(0)
     env.reset()
     reward_array = np.array([])
-    for episode in range(10000):
+    for episode in range(100000):
         observation = env.reset()
         # observation = preprocess(observation)
         observation = transforms.ToTensor()(observation).unsqueeze(0)
@@ -82,6 +83,8 @@ if __name__ == '__main__':
                 action = agent.choose_action(state)
                 # print('action: {}'.format(action))
                 observation, reward, done, info = env.step(int(action))
+                if LEARN is False:
+                    time.sleep(0.01)
                 # observation = preprocess(observation)
                 observation = transforms.ToTensor()(observation).unsqueeze(0)
                 indices = torch.LongTensor([1, 2, 3])
