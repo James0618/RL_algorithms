@@ -6,6 +6,9 @@
       <change beforePath="$PROJECT_DIR$/Complex_environment/Atari.py" beforeDir="false" afterPath="$PROJECT_DIR$/Complex_environment/Atari.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Complex_environment/params/dqn-atari.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/Complex_environment/params/dqn-atari.pkl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Complex_environment/params/result-atari.npy" beforeDir="false" afterPath="$PROJECT_DIR$/Complex_environment/params/result-atari.npy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple_environment/params/dqn-gpu.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/Simple_environment/params/dqn-gpu.pkl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/atari_wrappers.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/atari_wrappers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sources/DQN.py" beforeDir="false" afterPath="$PROJECT_DIR$/sources/DQN.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -189,8 +192,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.Atari" />
-        <item itemvalue="Python.test_gym" />
         <item itemvalue="Python.DQN-GPU" />
+        <item itemvalue="Python.test_gym" />
         <item itemvalue="Python.DQN" />
         <item itemvalue="Python.DQN-LSTM" />
       </list>
@@ -238,7 +241,9 @@
       <workItem from="1578750909436" duration="4038000" />
       <workItem from="1578796659277" duration="7813000" />
       <workItem from="1578821744126" duration="8885000" />
-      <workItem from="1578876610362" duration="2519000" />
+      <workItem from="1578876610362" duration="5304000" />
+      <workItem from="1578897173302" duration="633000" />
+      <workItem from="1578963132161" duration="16506000" />
     </task>
     <task id="LOCAL-00001" summary="PPO">
       <created>1576921982153</created>
@@ -277,12 +282,12 @@
     <SUITE FILE_PATH="coverage/RL_algorithms$DPPO_learner.coverage" NAME="DPPO_learner Coverage Results" MODIFIED="1577607416247" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/DPPO" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DPPO__1_.coverage" NAME="DPPO (1) Coverage Results" MODIFIED="1577613802526" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DPPO.coverage" NAME="DPPO Coverage Results" MODIFIED="1577784640542" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/RL_algorithms$Atari.coverage" NAME="Atari Coverage Results" MODIFIED="1578886816494" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Complex_environment" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$Atari.coverage" NAME="Atari Coverage Results" MODIFIED="1578989858337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Complex_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DQN_LSTM.coverage" NAME="DQN-LSTM Coverage Results" MODIFIED="1578717669611" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$Actor_Critic.coverage" NAME="Actor_Critic Coverage Results" MODIFIED="1576754775501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_algorithms$test_gym.coverage" NAME="test_gym Coverage Results" MODIFIED="1578802145805" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Complex_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DQN.coverage" NAME="DQN Coverage Results" MODIFIED="1578719947418" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
-    <SUITE FILE_PATH="coverage/RL_algorithms$DQN_GPU.coverage" NAME="DQN-GPU Coverage Results" MODIFIED="1578734519222" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$DQN_GPU.coverage" NAME="DQN-GPU Coverage Results" MODIFIED="1578983034234" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DQN__1_.coverage" NAME="DQN (1) Coverage Results" MODIFIED="1578648921195" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
   </component>
 </project>

@@ -34,17 +34,18 @@ class DQN:
     def choose_action(self, state):
         state_tensor = torch.FloatTensor(state).to(device=self.device)
         self.times += 1
-        if self.times < 1e6:
-            epsilon = (((self.epsilon - 1) * self.times) / 1e6) + 1
+        if self.times < 1e4:
+            epsilon = (((self.epsilon - 1) * self.times) / 1e4) + 1
         else:
             epsilon = self.epsilon
         # epsilon-argmax
         if random.random() < epsilon:
             action = np.random.randint(self.n_action)
+            action = torch.LongTensor([action]).to(self.device)
         else:
             action = self.q_net.forward(state_tensor).max(1)[1]
             # print(action)
-        return int(action)
+        return int(action), float(self.q_net.forward(state_tensor).gather(1, action.unsqueeze(0)))
 
     def learn(self):
         # check if replay is available
@@ -61,8 +62,10 @@ class DQN:
         #             state & state' - FloatTensor
         #             action - int
         #             reward - float
+        #             done - bool
         # data_state & data_state_ - [N_Batch, state_size]
         # action & reward -[N_Batch, 1]
+        done_list = []
         for index, transition in enumerate(transitions):
             if index == 0:
                 data_state = transition[0]
@@ -74,16 +77,18 @@ class DQN:
                 data_action = torch.cat((data_action, torch.LongTensor([transition[1]]).unsqueeze(0)), dim=0)
                 data_reward = torch.cat((data_reward, torch.FloatTensor([transition[2]]).unsqueeze(0)), dim=0)
                 data_state_ = torch.cat((data_state_, transition[3]), dim=0)
+            done_list.append(0 if transition[4] else 1)
 
         data_state = data_state.to(device=self.device)
         data_action = data_action.to(device=self.device)
         data_reward = data_reward.to(device=self.device)
         data_state_ = data_state_.to(device=self.device)
+        done_tensor = torch.FloatTensor(done_list).unsqueeze(1).to(self.device)
 
         # calculate q_current and q_next
         q_value = self.q_net.forward(data_state).gather(1, data_action)
         q_next = self.q_net.forward(data_state_).max(1)[0].view(len(transitions), 1)
-        target = data_reward + self.gamma * q_next
+        target = data_reward + self.gamma * q_next * done_tensor
         # print('q_value, q_next, target: ', q_value, q_next, target)
         loss = self.loss_func(input=q_value, target=target)
 
