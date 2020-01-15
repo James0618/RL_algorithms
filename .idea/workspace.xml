@@ -2,13 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0109929d-eda2-402d-902a-496a2b95fc2c" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/sources/PPO.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sources/params/ppo_net.pkl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Complex_environment/Atari.py" beforeDir="false" afterPath="$PROJECT_DIR$/Complex_environment/Atari.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Complex_environment/params/dqn-atari.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/Complex_environment/params/dqn-atari.pkl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Complex_environment/params/result-atari.npy" beforeDir="false" afterPath="$PROJECT_DIR$/Complex_environment/params/result-atari.npy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Simple_environment/params/dqn-gpu.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/Simple_environment/params/dqn-gpu.pkl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/atari_wrappers.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/atari_wrappers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sources/DQN.py" beforeDir="false" afterPath="$PROJECT_DIR$/sources/DQN.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple_environment/PPO.py" beforeDir="false" afterPath="$PROJECT_DIR$/Simple_environment/PPO.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple_environment/params/ppo_policy.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/Simple_environment/params/ppo_policy.pkl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple_environment/params/ppo_state_value.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/Simple_environment/params/ppo_state_value.pkl" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -78,30 +78,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Atari">
-    <configuration name="Atari" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="RL_algorithms" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Complex_environment" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Complex_environment/Atari.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="DQN-GPU" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.PPO">
+    <configuration name="PPO (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="RL_algorithms" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -114,7 +92,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Simple_environment/DQN-GPU.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Simple_environment/PPO.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -123,7 +101,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="DQN-LSTM" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="PPO" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="RL_algorithms" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -131,56 +109,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Simple_environment" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/sources" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Simple_environment/DQN-LSTM.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="DQN" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="RL_algorithms" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Simple_environment" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Simple_environment/DQN.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="test_gym" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="RL_algorithms" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Complex_environment" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Complex_environment/test_gym.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sources/PPO.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -191,11 +125,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.Atari" />
-        <item itemvalue="Python.DQN-GPU" />
-        <item itemvalue="Python.test_gym" />
-        <item itemvalue="Python.DQN" />
-        <item itemvalue="Python.DQN-LSTM" />
+        <item itemvalue="Python.PPO" />
+        <item itemvalue="Python.PPO (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -243,7 +174,8 @@
       <workItem from="1578821744126" duration="8885000" />
       <workItem from="1578876610362" duration="5304000" />
       <workItem from="1578897173302" duration="633000" />
-      <workItem from="1578963132161" duration="16506000" />
+      <workItem from="1578963132161" duration="19656000" />
+      <workItem from="1579072681946" duration="9337000" />
     </task>
     <task id="LOCAL-00001" summary="PPO">
       <created>1576921982153</created>
@@ -277,17 +209,18 @@
     <option name="LAST_COMMIT_MESSAGE" value="PPO" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/RL_algorithms$DDPG.coverage" NAME="DDPG Coverage Results" MODIFIED="1576484371478" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/RL_algorithms$PPO.coverage" NAME="PPO Coverage Results" MODIFIED="1577543933510" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/RL_algorithms$DPPO_learner.coverage" NAME="DPPO_learner Coverage Results" MODIFIED="1577607416247" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/DPPO" />
-    <SUITE FILE_PATH="coverage/RL_algorithms$DPPO__1_.coverage" NAME="DPPO (1) Coverage Results" MODIFIED="1577613802526" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$PPO.coverage" NAME="PPO Coverage Results" MODIFIED="1579088048026" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/sources" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$PPO__1_.coverage" NAME="PPO (1) Coverage Results" MODIFIED="1579076729405" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DPPO.coverage" NAME="DPPO Coverage Results" MODIFIED="1577784640542" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/RL_algorithms$Atari.coverage" NAME="Atari Coverage Results" MODIFIED="1578989858337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Complex_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DQN_LSTM.coverage" NAME="DQN-LSTM Coverage Results" MODIFIED="1578717669611" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$Actor_Critic.coverage" NAME="Actor_Critic Coverage Results" MODIFIED="1576754775501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$DQN_GPU.coverage" NAME="DQN-GPU Coverage Results" MODIFIED="1578983034234" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$DDPG.coverage" NAME="DDPG Coverage Results" MODIFIED="1576484371478" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$DPPO_learner.coverage" NAME="DPPO_learner Coverage Results" MODIFIED="1577607416247" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/DPPO" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$DPPO__1_.coverage" NAME="DPPO (1) Coverage Results" MODIFIED="1577613802526" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$Atari.coverage" NAME="Atari Coverage Results" MODIFIED="1578989858337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Complex_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$test_gym.coverage" NAME="test_gym Coverage Results" MODIFIED="1578802145805" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Complex_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DQN.coverage" NAME="DQN Coverage Results" MODIFIED="1578719947418" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
-    <SUITE FILE_PATH="coverage/RL_algorithms$DQN_GPU.coverage" NAME="DQN-GPU Coverage Results" MODIFIED="1578983034234" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DQN__1_.coverage" NAME="DQN (1) Coverage Results" MODIFIED="1578648921195" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
   </component>
 </project>

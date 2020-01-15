@@ -9,11 +9,13 @@ class ValueNet(nn.Module):
     def __init__(self, n_state):
         super(ValueNet, self).__init__()
         self.state_value = nn.Sequential(
-            nn.Linear(n_state, 64),
+            nn.Linear(n_state, 128),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(128, 64),
             nn.ReLU(),
-            nn.Linear(64, 1),
+            nn.Linear(64, 16),
+            nn.ReLU(),
+            nn.Linear(16, 1),
         )
 
     def forward(self, state):
@@ -29,7 +31,9 @@ class PolicyNet(nn.Module):
             nn.ReLU(),
             nn.Linear(128, 64),
             nn.ReLU(),
-            nn.Linear(64, n_action),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, n_action),
         )
 
     def forward(self, state):
@@ -41,7 +45,7 @@ class PolicyNet(nn.Module):
 
 
 class Model:
-    def __init__(self, n_state, n_action, learn=False, gamma=0.95, learning_rate=0.005, epsilon=0.1):
+    def __init__(self, n_state, n_action, learn=False, gamma=0.99, learning_rate=0.005, epsilon=0.2):
         # init networks
         if learn is True:
             self.policy = PolicyNet(n_state=n_state, n_action=n_action)
@@ -84,8 +88,8 @@ class Model:
         old_policy = PolicyNet(n_state=self.n_state, n_action=self.n_action)
         old_policy.load_state_dict(self.policy.state_dict())
 
-        policy_optimizer = torch.optim.SGD(params=self.policy.parameters(), lr=self.learning_rate)
-        state_value_optimizer = torch.optim.SGD(params=self.state_value.parameters(), lr=2*self.learning_rate)
+        policy_optimizer = torch.optim.Adam(params=self.policy.parameters(), lr=self.learning_rate)
+        state_value_optimizer = torch.optim.Adam(params=self.state_value.parameters(), lr=2*self.learning_rate)
         for j in range(12):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
@@ -139,7 +143,7 @@ if __name__ == '__main__':
     env = gym.make('CartPole-v1')
     LEARN = True
     model = Model(n_state=2*env.observation_space.shape[0], learn=LEARN, n_action=env.action_space.n,
-                  learning_rate=0.005, epsilon=0.1)
+                  learning_rate=0.0005, epsilon=0.1)
     env.reset()
     BATCH_SIZE = 16
 
@@ -152,7 +156,7 @@ if __name__ == '__main__':
         action_collections = torch.FloatTensor([])
         reward_collections = torch.FloatTensor([])
         for t in range(500):
-            if episode > 1500 or LEARN is False:
+            if LEARN is False:
                 env.render()
             if t < 1:
                 observation, _, done, info = env.step(0)
