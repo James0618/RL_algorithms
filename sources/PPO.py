@@ -11,16 +11,20 @@ class Net(nn.Module):
         self.state_value = nn.Sequential(
             nn.Linear(n_state, 64),
             nn.ReLU(),
-            nn.Linear(64, 16),
+            nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(16, 1),
+            nn.Linear(32, 8),
+            nn.ReLU(),
+            nn.Linear(8, 1),
         )
         self.policy = nn.Sequential(
             nn.Linear(n_state, 64),
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(32, n_action),
+            nn.Linear(32, 8),
+            nn.ReLU(),
+            nn.Linear(8, n_action),
         )
 
     def forward(self, state):
@@ -120,29 +124,32 @@ class Model:
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    LEARN = True
+    LEARN = False
     model = Model(net=Net, n_state=env.observation_space.shape[0], learn=LEARN, n_action=env.action_space.n,
-                  learning_rate=0.001, epsilon=0.1)
+                  learning_rate=0.0005, epsilon=0.1)
     env.reset()
-    BATCH_SIZE = 16
+    BATCH_SIZE = 32
     episode = 0
     T = 0
     done = True
+    state_collections = torch.FloatTensor([[]])
+    action_collections = torch.FloatTensor([])
+    reward_collections = torch.FloatTensor([])
 
-    for t in range(100000):
+    for t in range(500000):
         if done:
             observation = env.reset()
             state = observation
-
             reward = 0
-            state_collections = torch.FloatTensor([[]])
-            action_collections = torch.FloatTensor([])
-            reward_collections = torch.FloatTensor([])
         if LEARN is False:
             env.render()
         action = model.choose_action(torch.FloatTensor(state))
         # print('action: {}'.format(action))
         observation, reward, done, info = env.step(int(action))
+        if done:
+            reward = 0
+        else:
+            reward = 1
         # x, x_dot, theta, theta_dot = observation
         # store [state, action, reward] collections
         if state_collections.shape[1] == 0:
@@ -153,14 +160,13 @@ if __name__ == '__main__':
             action_collections = action.unsqueeze(0)
         else:
             action_collections = torch.cat((action_collections, action.unsqueeze(0)))
-
         if reward_collections.shape[0] == 0:
             reward_collections = torch.FloatTensor([reward])
         else:
             reward_collections = torch.cat((reward_collections, torch.FloatTensor([reward])))
 
         state = observation  # next state
-        if t % BATCH_SIZE == 0:
+        if (t - T) % BATCH_SIZE == 0:
             if LEARN is True:
                 model.learn(state_collections=state_collections, action_collections=action_collections,
                             reward_collections=reward_collections, final_state=torch.FloatTensor(state))
@@ -169,10 +175,16 @@ if __name__ == '__main__':
             reward_collections = torch.FloatTensor([])
 
         if done:
+            if LEARN is True and reward_collections.shape[0] != 0:
+                model.learn(state_collections=state_collections, action_collections=action_collections,
+                            reward_collections=reward_collections, final_state=torch.FloatTensor(state))
+            state_collections = torch.FloatTensor([[]])
+            action_collections = torch.FloatTensor([])
+            reward_collections = torch.FloatTensor([])
             print("Episode {}: finished after {} timesteps".format(episode, t - T))
+            if (t - T) > 450:
+                model.save_net()
             T = t
             episode += 1
-
-    model.save_net()
 
     env.close()
