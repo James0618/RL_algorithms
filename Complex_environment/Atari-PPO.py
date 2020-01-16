@@ -29,10 +29,7 @@ class Network(nn.Module):
             ),
             nn.ReLU(),
         )
-        self.feature_layer = nn.Sequential(
-            nn.Linear(32 * 9 * 9, 256),
-            nn.ReLU()
-        )
+        self.feature_layer = nn.Linear(32 * 9 * 9, 256)
         self.state_value = nn.Sequential(
             nn.Linear(256, 32),
             nn.ReLU(),
@@ -67,15 +64,15 @@ def preprocess(obs):
 
 
 if __name__ == '__main__':
-    env = gym.make("Breakout-v0")
+    env = gym.make("Breakout-v4")
     # env = wrappers.make_atari("Breakout-v0")
     env = wrappers.wrap_deepmind(env, frame_stack=True)
     LEARN = True
     device = torch.device("cuda:0")
     model = PPO.Model(net=Network, device=device, learn=LEARN, n_action=env.action_space.n, learning_rate=0.00025,
-                      epsilon=0.1)
+                      epsilon=0.2)
     env.reset()
-    BATCH_SIZE = 128
+    BATCH_SIZE = 64
     episode = 0
     T = 0
     done = True
@@ -85,7 +82,7 @@ if __name__ == '__main__':
     total_reward = 0
     reward_array = np.array([])
 
-    for t in range(500000):
+    for t in range(5000000):
         if done:
             observation = env.reset()
             state = preprocess(observation)

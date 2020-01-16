@@ -90,7 +90,7 @@ class Model:
 
         self.old_net.load_state_dict(self.net.state_dict())
         optimizer = torch.optim.Adam(params=self.net.parameters(), lr=self.learning_rate)
-        for j in range(12):
+        for j in range(4):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
             # print(torch.exp(self.policy.forward(state_collections).log_prob(action_collections)))
@@ -126,7 +126,7 @@ class Model:
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
     LEARN = False
-    model = Model(net=Net, learn=LEARN, n_action=env.action_space.n, learning_rate=0.0005, epsilon=0.1)
+    model = Model(net=Net, learn=LEARN, n_action=env.action_space.n, learning_rate=0.00025, epsilon=0.1)
     env.reset()
     BATCH_SIZE = 32
     episode = 0
