@@ -90,7 +90,7 @@ class Model:
 
         self.old_net.load_state_dict(self.net.state_dict())
         optimizer = torch.optim.Adam(params=self.net.parameters(), lr=self.learning_rate)
-        for j in range(4):
+        for j in range(2):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
             # print(torch.exp(self.policy.forward(state_collections).log_prob(action_collections)))

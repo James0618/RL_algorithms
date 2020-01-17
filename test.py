@@ -3,6 +3,8 @@ import torch.nn as nn
 import numpy as np
 import gym
 from torch.distributions import Categorical
+import random
+import math
 
 
 class Net(nn.Module):
@@ -86,15 +88,20 @@ class Model:
 
         self.old_net.load_state_dict(self.net.state_dict())
         optimizer = torch.optim.Adam(params=self.net.parameters(), lr=self.learning_rate)
-        for j in range(4):
+
+        for j in range(2):
             # J = -loss
             # print(torch.exp(self.policy.forward(state_collections).log_prob(action_collections)))
-
-            ratio = torch.div(torch.exp(self.net.forward(state_collections)[0].log_prob(action_collections)),
-                              torch.exp(self.old_net.forward(state_collections)[0].log_prob(action_collections)))
-            policy_loss = - torch.mean(torch.min(torch.mul(ratio, advantage_collections.detach()),
+            idx = random.sample(range(0, T), math.floor(T * 0.5) + 1)
+            idx = torch.LongTensor(idx)
+            state_sample = state_collections.index_select(0, idx)
+            action_sample = action_collections.index_select(0, idx)
+            advantage_sample = advantage_collections.index_select(0, idx)
+            ratio = torch.div(torch.exp(self.net.forward(state_sample)[0].log_prob(action_sample)),
+                              torch.exp(self.old_net.forward(state_sample)[0].log_prob(action_sample)))
+            policy_loss = - torch.mean(torch.min(torch.mul(ratio, advantage_sample.detach()),
                                                  torch.mul(torch.clamp(ratio, min=1-self.epsilon, max=1+self.epsilon),
-                                                           advantage_collections.detach())
+                                                           advantage_sample.detach())
                                                  )
                                        )
             optimizer.zero_grad()
@@ -123,7 +130,7 @@ if __name__ == '__main__':
     env = gym.make('CartPole-v1')
     LEARN = False
     model = Model(net=Net, learn=LEARN, n_state=env.observation_space.shape[0], n_action=env.action_space.n,
-                  learning_rate=0.00025, epsilon=0.1)
+                  learning_rate=0.00025, epsilon=0.1, gamma=0.9)
     env.reset()
     BATCH_SIZE = 16
     episode = 0
