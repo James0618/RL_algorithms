@@ -3,6 +3,8 @@ import torch.nn as nn
 import numpy as np
 import gym
 from torch.distributions import Categorical
+import math
+import random
 
 
 class Net(nn.Module):
@@ -94,18 +96,27 @@ class Model:
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
             # print(torch.exp(self.policy.forward(state_collections).log_prob(action_collections)))
-            ratio = torch.div(torch.exp(self.net.forward(state_collections)[0].log_prob(action_collections)),
-                              torch.exp(self.old_net.forward(state_collections)[0].log_prob(action_collections)))
-            policy_loss = - torch.mean(torch.min(torch.mul(ratio, advantage_collections.detach()),
+            idx = random.sample(range(0, T), math.floor(T * 0.5) + 1)
+            idx = torch.LongTensor(idx).to(device=self.device)
+            state_sample = state_collections.index_select(0, idx)
+            action_sample = action_collections.index_select(0, idx)
+            advantage_sample = advantage_collections.index_select(0, idx)
+            predict_sample = predict_value.index_select(0, idx)
+            return_sample = return_collections.index_select(0, idx)
+
+            ratio = torch.div(torch.exp(self.net.forward(state_sample)[0].log_prob(action_sample)),
+                              torch.exp(self.old_net.forward(state_sample)[0].log_prob(action_sample)))
+            policy_loss = - torch.mean(torch.min(torch.mul(ratio, advantage_sample.detach()),
                                                  torch.mul(torch.clamp(ratio, min=1-self.epsilon, max=1+self.epsilon),
-                                                           advantage_collections.detach())
+                                                           advantage_sample.detach())
                                                  )
                                        )
+
             optimizer.zero_grad()
             policy_loss.backward(retain_graph=True)
             optimizer.step()
 
-            critic_loss = torch.mean(torch.pow(predict_value - return_collections, 2))
+            critic_loss = torch.mean(torch.pow(predict_sample - return_sample, 2))
 
             optimizer.zero_grad()
             critic_loss.backward(retain_graph=True)

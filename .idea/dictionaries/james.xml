@@ -6,6 +6,7 @@
       <w>cuda</w>
       <w>deepmind</w>
       <w>dppo</w>
+      <w>frameskip</w>
       <w>lstm</w>
     </words>
   </dictionary>

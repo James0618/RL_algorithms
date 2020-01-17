@@ -97,6 +97,9 @@ class Model:
             state_sample = state_collections.index_select(0, idx)
             action_sample = action_collections.index_select(0, idx)
             advantage_sample = advantage_collections.index_select(0, idx)
+            predict_sample = predict_value.index_select(0, idx)
+            return_sample = return_collections.index_select(0, idx)
+
             ratio = torch.div(torch.exp(self.net.forward(state_sample)[0].log_prob(action_sample)),
                               torch.exp(self.old_net.forward(state_sample)[0].log_prob(action_sample)))
             policy_loss = - torch.mean(torch.min(torch.mul(ratio, advantage_sample.detach()),
@@ -108,7 +111,7 @@ class Model:
             policy_loss.backward(retain_graph=True)
             optimizer.step()
 
-            state_loss = torch.mean(torch.pow(predict_value - return_collections, 2))
+            state_loss = torch.mean(torch.pow(predict_sample - return_sample, 2))
 
             optimizer.zero_grad()
             state_loss.backward(retain_graph=True)

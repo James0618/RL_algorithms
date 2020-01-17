@@ -16,30 +16,35 @@ class Network(nn.Module):
         self.conv = nn.Sequential(      # input_shape: 4*84*84
             nn.Conv2d(
                 in_channels=4,          # Gray: 1 channels * 4 images/
-                out_channels=16,        # filters' number
+                out_channels=32,        # filters' number
                 kernel_size=8,          # kernel's size
                 stride=4,
-            ),                          # output_shape: 16*20*20
+                padding=2
+            ),                          # output_shape: 32*
             nn.ReLU(),
-            nn.Conv2d(                  # input_shape: 16*20*20
-                in_channels=16,
-                out_channels=32,
+            nn.Conv2d(                  # input_shape: 32*
+                in_channels=32,
+                out_channels=64,
                 kernel_size=4,
-                stride=2,               # output_shape: 32*9*9
+                stride=2,               # output_shape: 64*
+                padding=1
             ),
             nn.ReLU(),
+            nn.Conv2d(                  # input_shape: 64*
+                in_channels=64,
+                out_channels=64,
+                kernel_size=3,
+                stride=1,               # output_shape: 64*10*10
+                padding=1
+            ),
+            nn.ReLU()
         )
-        self.feature_layer = nn.Linear(32 * 9 * 9, 256)
-        self.state_value = nn.Sequential(
-            nn.Linear(256, 32),
-            nn.ReLU(),
-            nn.Linear(32, 1)
+        self.feature_layer = nn.Sequential(
+            nn.Linear(6400, 512),
+            nn.ReLU()
         )
-        self.policy = nn.Sequential(
-            nn.Linear(256, 32),
-            nn.ReLU(),
-            nn.Linear(32, output_shape)
-        )
+        self.state_value = nn.Linear(512, 1)
+        self.policy = nn.Linear(512, output_shape)
 
     def forward(self, state):
         output = self.conv(state)
@@ -64,13 +69,13 @@ def preprocess(obs):
 
 
 if __name__ == '__main__':
-    env = gym.make("Breakout-v4")
-    # env = wrappers.make_atari("Breakout-v0")
+    # env = gym.make("BreakoutNoFrameskip-v4")
+    env = wrappers.make_atari("BreakoutNoFrameskip-v4")
     env = wrappers.wrap_deepmind(env, frame_stack=True)
     LEARN = True
     device = torch.device("cuda:0")
-    model = PPO.Model(net=Network, device=device, learn=LEARN, n_action=env.action_space.n, learning_rate=0.00025,
-                      epsilon=0.2)
+    model = PPO.Model(net=Network, device=device, learn=LEARN, n_action=env.action_space.n, learning_rate=0.0001,
+                      gamma=0.999, epsilon=0.2)
     env.reset()
     BATCH_SIZE = 64
     episode = 0
