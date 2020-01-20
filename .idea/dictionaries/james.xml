@@ -5,9 +5,12 @@
       <w>conv</w>
       <w>cuda</w>
       <w>deepmind</w>
+      <w>dones</w>
       <w>dppo</w>
       <w>frameskip</w>
+      <w>fromarray</w>
       <w>lstm</w>
+      <w>timesteps</w>
     </words>
   </dictionary>
 </component>

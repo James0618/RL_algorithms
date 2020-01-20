@@ -8,43 +8,34 @@ import time
 import cv2
 import numpy as np
 import common.atari_wrappers as wrappers
+from PIL import Image
 
 
-class Network(nn.Module):
+class AtariNet(nn.Module):
     def __init__(self, output_shape):
-        super(Network, self).__init__()
+        super(AtariNet, self).__init__()
         self.conv = nn.Sequential(      # input_shape: 4*84*84
             nn.Conv2d(
                 in_channels=4,          # Gray: 1 channels * 4 images/
-                out_channels=32,        # filters' number
+                out_channels=16,        # filters' number
                 kernel_size=8,          # kernel's size
-                stride=4,
-                padding=2
-            ),                          # output_shape: 32*
-            nn.ReLU(),
-            nn.Conv2d(                  # input_shape: 32*
-                in_channels=32,
-                out_channels=64,
-                kernel_size=4,
-                stride=2,               # output_shape: 64*
-                padding=1
+                stride=4
             ),
             nn.ReLU(),
-            nn.Conv2d(                  # input_shape: 64*
-                in_channels=64,
-                out_channels=64,
-                kernel_size=3,
-                stride=1,               # output_shape: 64*10*10
-                padding=1
+            nn.Conv2d(
+                in_channels=16,
+                out_channels=32,
+                kernel_size=4,
+                stride=2
             ),
             nn.ReLU()
         )
         self.feature_layer = nn.Sequential(
-            nn.Linear(6400, 512),
+            nn.Linear(2592, 256),
             nn.ReLU()
         )
-        self.state_value = nn.Linear(512, 1)
-        self.policy = nn.Linear(512, output_shape)
+        self.state_value = nn.Linear(256, 1)
+        self.policy = nn.Linear(256, output_shape)
 
     def forward(self, state):
         output = self.conv(state)
@@ -58,83 +49,119 @@ class Network(nn.Module):
         return distribution, action_values
 
 
+# def preprocess(obs):
+#     for index in range(4):
+#         if index == 0:
+#             result = transforms.ToTensor()(obs.frame(index))
+#         else:
+#             temp = transforms.ToTensor()(obs.frame(index))
+#             result = torch.cat((result, temp), dim=0)
+#     return result       # shape: 4*84*84
+
 def preprocess(obs):
-    for index in range(4):
-        if index == 0:
-            result = transforms.ToTensor()(obs.frame(index)).unsqueeze(0)
-        else:
-            temp = transforms.ToTensor()(obs.frame(index)).unsqueeze(0)
-            result = torch.cat((result, temp), dim=1)
-    return result
+    return torch.from_numpy(obs).float()
+
+
+class Worker:
+    def __init__(self, agent):
+        self.agent = agent
+
+    def cal_adv(self, states, rewards, value_pred, dones, gamma):
+        """
+        :param states: Tensor[T, state_features]
+        :param rewards: Tensor[T]
+        :param value_pred: Tensor[T+1]
+        :param dones: Tensor[T+1]
+        :param gamma: float
+        :return: advantages -> Tensor[T] & value_target -> Tensor[T]
+        """
+        T = states.shape[0]
+        advantages = torch.zeros(T)
+        last_adv = 0
+        for t in reversed(range(T)):
+            non_terminal = 1 - dones[t + 1]
+            delta = rewards[t] + gamma * value_pred[t + 1] * non_terminal - value_pred[t]
+            last_adv = delta + gamma * non_terminal * last_adv
+            advantages[t] = last_adv
+        return advantages, advantages + value_pred[:T]
+
+    def work(self):
+        # env = wrappers.make_atari("BreakoutNoFrameskip-v4")
+        # env = wrappers.wrap_deepmind(env, frame_stack=True)
+        env = gym.make('CartPole-v1')
+        LEARN = True
+        device = torch.device("cuda:0")
+
+        episode = 0
+        t = 0
+        T = 0
+        horizon = 32
+        done = True
+        total_reward = 0
+        reward_array = np.array([])
+
+        observation = env.reset()
+        state = preprocess(observation)
+
+        state_collections = torch.zeros(horizon, env.observation_space.shape[0])
+        action_collections = torch.zeros(horizon)
+        reward_collections = torch.zeros(horizon)
+        done_collections = torch.zeros(horizon + 1)
+        value_collections = torch.zeros(horizon + 1)
+        while True:
+            if done:
+                observation = env.reset()
+                state = preprocess(observation)
+                total_reward = 0
+                print("Episode {}: finished after {} timesteps".format(episode, t - T))
+                T = t
+                episode += 1
+            if LEARN is False:
+                env.render()
+
+            action = self.agent.choose_action(state.to(device))
+            # print('action: {}'.format(action))
+            observation, reward, done, info = env.step(int(action))
+            # img = Image.fromarray(observation.frame(0))
+            # img.show()
+            total_reward += reward
+
+            if t > 0 and t % horizon == 0:
+                done_collections[horizon] = done
+                value_collections[horizon] = self.agent.net.forward(state.to(device))[1]
+                advantages, value_target = self.cal_adv(states=state_collections, rewards=reward_collections,
+                                                        value_pred=value_collections, dones=done_collections,
+                                                        gamma=0.99)
+                self.agent.learn(state_collections=state_collections, action_collections=action_collections,
+                                 advantage_collections=advantages, value_target=value_target)
+                yield advantages, value_target
+                # state_collections = torch.zeros(horizon, 4, 84, 84)
+                state_collections = torch.zeros(horizon, env.observation_space.shape[0])
+                action_collections = torch.zeros(horizon)
+                reward_collections = torch.zeros(horizon)
+                done_collections = torch.zeros(horizon + 1)
+                value_collections = torch.zeros(horizon + 1)
+            state_collections[t % horizon] = state
+            action_collections[t % horizon] = action
+            reward_collections[t % horizon] = reward
+            done_collections[t % horizon] = done
+            value_collections[t % horizon] = self.agent.net.forward(state.to(device))[1]
+
+            state = preprocess(observation)  # next state
+            t += 1
 
 
 if __name__ == '__main__':
-    # env = gym.make("BreakoutNoFrameskip-v4")
-    env = wrappers.make_atari("BreakoutNoFrameskip-v4")
-    env = wrappers.wrap_deepmind(env, frame_stack=True)
-    LEARN = True
+    # env = wrappers.make_atari("BreakoutNoFrameskip-v4")
+    # env = wrappers.wrap_deepmind(env, frame_stack=True)
+    env = gym.make('CartPole-v1')
     device = torch.device("cuda:0")
-    model = PPO.Model(net=Network, device=device, learn=LEARN, n_action=env.action_space.n, learning_rate=0.0001,
-                      gamma=0.999, epsilon=0.2)
-    env.reset()
-    BATCH_SIZE = 64
-    episode = 0
-    T = 0
-    done = True
-    state_collections = torch.FloatTensor([[]])
-    action_collections = torch.FloatTensor([])
-    reward_collections = torch.FloatTensor([])
-    total_reward = 0
-    reward_array = np.array([])
+    LEARN = True
 
-    for t in range(5000000):
-        if done:
-            observation = env.reset()
-            state = preprocess(observation)
-            reward = 0
-            total_reward = 0
-        if LEARN is False:
-            env.render()
-        action = model.choose_action(torch.FloatTensor(state).to(device))
-        # print('action: {}'.format(action))
-        observation, reward, done, info = env.step(int(action))
-        total_reward += reward
+    ppo = PPO.Model(net=PPO.Net, learn=LEARN, device=device, n_state=env.observation_space.shape[0],
+                    n_action=env.action_space.n, learning_rate=0.00025, epsilon=0.1)
+    worker = Worker(agent=ppo)
+    iter_unit = worker.work()
 
-        if state_collections.shape[1] == 0:
-            state_collections = torch.FloatTensor(state)
-        else:
-            state_collections = torch.cat((state_collections, torch.FloatTensor(state)))
-        if action_collections.shape[0] == 0:
-            action_collections = action.unsqueeze(0)
-        else:
-            action_collections = torch.cat((action_collections, action.unsqueeze(0)))
-        if reward_collections.shape[0] == 0:
-            reward_collections = torch.FloatTensor([reward])
-        else:
-            reward_collections = torch.cat((reward_collections, torch.FloatTensor([reward])))
-
-        state = preprocess(observation)  # next state
-
-        if (t - T) % BATCH_SIZE == 0:
-            if LEARN is True:
-                model.learn(state_collections=state_collections, action_collections=action_collections,
-                            reward_collections=reward_collections, final_state=torch.FloatTensor(state))
-            state_collections = torch.FloatTensor([[]])
-            action_collections = torch.FloatTensor([])
-            reward_collections = torch.FloatTensor([])
-
-        if done:
-            if LEARN is True and reward_collections.shape[0] != 0:
-                model.learn(state_collections=state_collections, action_collections=action_collections,
-                            reward_collections=reward_collections, final_state=torch.FloatTensor(state))
-            state_collections = torch.FloatTensor([[]])
-            action_collections = torch.FloatTensor([])
-            reward_collections = torch.FloatTensor([])
-            print("Episode {}: Reward -> {} after {} steps".format(episode, total_reward, t - T))
-            T = t
-            total_reward = 0
-            reward_array = np.append(reward_array, np.array([total_reward]))
-            np.save('params/result-atari-ppo.npy', reward_array)
-            episode += 1
-
-    env.close()
+    while True:
+        adv, v_target = iter_unit.__next__()
