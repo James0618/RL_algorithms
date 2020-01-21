@@ -92,12 +92,8 @@ class Worker:
         LEARN = True
         device = torch.device("cuda:0")
 
-        episode = 0
-        t = 0
-        T = 0
-        horizon = 32
+        episode, t, T, total_reward, horizon = 0, 0, 0, 0, 32
         done = True
-        total_reward = 0
         reward_array = np.array([])
 
         observation = env.reset()
@@ -124,6 +120,13 @@ class Worker:
             observation, reward, done, info = env.step(int(action))
             # img = Image.fromarray(observation.frame(0))
             # img.show()
+            x, x_dot, theta, theta_dot = observation
+            # use the reward as Morvan Zhou defined
+            # https://github.com/MorvanZhou/PyTorch-Tutorial/blob/master/tutorial-contents/405_DQN_Reinforcement_learning.py
+            r1 = (env.x_threshold - abs(x)) / env.x_threshold - 0.8
+            r2 = (env.theta_threshold_radians - abs(theta)) / env.theta_threshold_radians - 0.5
+            reward = r1 + r2
+
             total_reward += reward
 
             if t > 0 and t % horizon == 0:
@@ -131,7 +134,7 @@ class Worker:
                 value_collections[horizon] = self.agent.net.forward(state.to(device))[1]
                 advantages, value_target = self.cal_adv(states=state_collections, rewards=reward_collections,
                                                         value_pred=value_collections, dones=done_collections,
-                                                        gamma=0.99)
+                                                        gamma=0.95)
                 self.agent.learn(state_collections=state_collections, action_collections=action_collections,
                                  advantage_collections=advantages, value_target=value_target)
                 yield advantages, value_target
@@ -159,7 +162,7 @@ if __name__ == '__main__':
     LEARN = True
 
     ppo = PPO.Model(net=PPO.Net, learn=LEARN, device=device, n_state=env.observation_space.shape[0],
-                    n_action=env.action_space.n, learning_rate=0.00025, epsilon=0.1)
+                    n_action=env.action_space.n, learning_rate=0.002, epsilon=0.1)
     worker = Worker(agent=ppo)
     iter_unit = worker.work()
 

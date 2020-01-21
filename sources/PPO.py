@@ -13,32 +13,26 @@ class Net(nn.Module):
         self.discrete = discrete
         self.state_value = nn.Sequential(
             nn.Linear(n_state, 64),
-            nn.ReLU(),
-            nn.Linear(64, 32),
-            nn.ReLU(),
-            nn.Linear(32, 8),
-            nn.ReLU(),
-            nn.Linear(8, 1),
+            nn.Tanh(),
+            nn.Linear(64, 64),
+            nn.Tanh(),
+            nn.Linear(64, 1),
         )
         if self.discrete:
             self.policy = nn.Sequential(
                 nn.Linear(n_state, 64),
-                nn.ReLU(),
-                nn.Linear(64, 32),
-                nn.ReLU(),
-                nn.Linear(32, 8),
-                nn.ReLU(),
-                nn.Linear(8, n_action),
+                nn.Tanh(),
+                nn.Linear(64, 64),
+                nn.Tanh(),
+                nn.Linear(64, n_action),
             )
         else:
             self.policy = nn.Sequential(
                 nn.Linear(n_state, 64),
-                nn.ReLU(),
-                nn.Linear(64, 32),
-                nn.ReLU(),
-                nn.Linear(32, 8),
-                nn.ReLU(),
-                nn.Linear(8, 2 * n_action),
+                nn.Tanh(),
+                nn.Linear(64, 64),
+                nn.Tanh(),
+                nn.Linear(64, 2 * n_action),
             )
 
     def forward(self, state):
@@ -88,17 +82,13 @@ class Model:
         value_target = value_target.to(self.device)
         predict_value = self.net.forward(state_collections)[1]
 
-        idx = [i for i in range(advantage_collections.size(0)-1, -1, -1)]
-        idx = torch.LongTensor(idx).to(device=self.device)
-        advantage_collections = advantage_collections.index_select(0, idx)
-
         self.old_net.load_state_dict(self.net.state_dict())
         optimizer = torch.optim.Adam(params=self.net.parameters(), lr=self.learning_rate)
-        for j in range(2):
+        for j in range(4):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
             # print(torch.exp(self.policy.forward(state_collections).log_prob(action_collections)))
-            idx = random.sample(range(0, T), math.floor(T * 0.5) + 1)
+            idx = random.sample(range(0, T), T)
             idx = torch.LongTensor(idx).to(device=self.device)
             state_sample = state_collections.index_select(0, idx)
             action_sample = action_collections.index_select(0, idx)
@@ -118,11 +108,7 @@ class Model:
             loss = vf_loss + clip_loss
 
             optimizer.zero_grad()
-            clip_loss.backward(retain_graph=True)
-            optimizer.step()
-
-            optimizer.zero_grad()
-            vf_loss.backward(retain_graph=True)
+            loss.backward(retain_graph=True)
             optimizer.step()
 
     def choose_action(self, state):
