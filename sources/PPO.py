@@ -52,8 +52,8 @@ class Net(nn.Module):
             return distribution, action_values
         else:
             mean, logstd = self.mean(actions), self.logstd(actions)
-            std = torch.nn.functional.softplus(logstd)
-            mean = torch.tanh(mean) * 2
+            std = torch.tanh(logstd) + 1.01
+            mean = 2 * torch.tanh(mean)
             distribution = Normal(loc=mean, scale=std)
             return distribution, action_values
 
@@ -92,11 +92,11 @@ class Model:
 
         self.old_net.load_state_dict(self.net.state_dict())
         optimizer = torch.optim.Adam(params=self.net.parameters(), lr=self.learning_rate)
-        idx_list = self.batch(T, 2)
-        for j in range(4):
+        for j in range(3):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
             # print(torch.exp(self.policy.forward(state_collections).log_prob(action_collections)))
+            idx_list = self.batch(T, 2)
             for idx in idx_list:
                 idx = torch.LongTensor(idx).to(device=self.device)
                 state_sample = state_collections.index_select(0, idx)
@@ -106,21 +106,22 @@ class Model:
                 target_sample = value_target.index_select(0, idx)
                 if self.net.discrete is True:
                     ratio = torch.div(torch.exp(self.net.forward(state_sample)[0].log_prob(action_sample)),
-                                      torch.exp(self.old_net.forward(state_sample)[0].log_prob(action_sample)).detach())
+                                      torch.exp(self.old_net.forward(state_sample)[0].log_prob(action_sample)))
                 else:
-                    # logp = self.net.forward(state_sample)[0].log_prob(action_sample).squeeze()
-                    # old_logp = self.old_net.forward(state_sample)[0].log_prob(action_sample).squeeze()
-                    dis = self.net.forward(state_sample)[0]
-                    mean, std = dis.mean, dis.stddev
-                    old_dis = self.old_net.forward(state_sample)[0]
-                    old_mean, old_std = old_dis.mean, old_dis.stddev
-                    logp = -(0.5 * torch.pow((action_sample - mean) / std, 2) + torch.log(std))
-                    old_logp = -(0.5 * torch.pow((action_sample - old_mean) / old_std, 2) + torch.log(old_std))
-                    ratio = torch.div(torch.exp(logp), torch.exp(old_logp)).squeeze()
+                    logp = self.net.forward(state_sample)[0].log_prob(action_sample).squeeze()
+                    old_logp = self.old_net.forward(state_sample)[0].log_prob(action_sample).squeeze()
+                    # dis = self.net.forward(state_sample)[0]
+                    # mean, std = dis.mean, dis.stddev
+                    # old_dis = self.old_net.forward(state_sample)[0]
+                    # old_mean, old_std = old_dis.mean, old_dis.stddev
+                    # logp = -(0.5 * torch.pow((action_sample - mean) / std, 2) + torch.log(std))
+                    # old_logp = -(0.5 * torch.pow((action_sample - old_mean) / old_std, 2) + torch.log(old_std))
+                    ratio = torch.div(torch.exp(logp) + 0.01, torch.exp(old_logp) + 0.01).squeeze()
                 # a = torch.mul(ratio, advantage_sample.detach())
                 clip_loss = - torch.mean(torch.min(torch.mul(ratio, advantage_sample.detach()),
-                                                   torch.mul(torch.clamp(ratio, min=1-self.epsilon, max=1+self.epsilon),
-                                                             advantage_sample.detach())
+                                                   torch.mul(
+                                                       torch.clamp(ratio, min=1 - self.epsilon, max=1 + self.epsilon),
+                                                       advantage_sample.detach())
                                                    )
                                          )
                 vf_loss = torch.mean(torch.pow(predict_sample - target_sample, 2))
@@ -129,10 +130,11 @@ class Model:
                 optimizer.zero_grad()
                 loss.backward(retain_graph=True)
                 optimizer.step()
+        return loss
 
     def choose_action(self, state):
         # print(self.policy.forward(state).probs)
-        a = self.net.forward(state)[0]
+        # a = self.net.forward(state)[0]
         action = self.net.forward(state)[0].sample()
         return action
 

@@ -1,6 +1,7 @@
 import sources.PPO as PPO
 import torch
 import torch.nn as nn
+import torch.multiprocessing as mp
 import torchvision.transforms as transforms
 from torch.distributions import Categorical
 import gym
@@ -15,11 +16,11 @@ class AtariNet(nn.Module):
     def __init__(self, output_shape):
         super(AtariNet, self).__init__()
         self.discrete = True
-        self.conv = nn.Sequential(      # input_shape: 4*84*84
+        self.conv = nn.Sequential(  # input_shape: 4*84*84
             nn.Conv2d(
-                in_channels=4,          # Gray: 1 channels * 4 images/
-                out_channels=16,        # filters' number
-                kernel_size=8,          # kernel's size
+                in_channels=4,  # Gray: 1 channels * 4 images/
+                out_channels=16,  # filters' number
+                kernel_size=8,  # kernel's size
                 stride=4
             ),
             nn.ReLU(),
@@ -64,8 +65,10 @@ def preprocess(obs):
 
 
 class Worker:
-    def __init__(self, agent):
+    def __init__(self, agent, worker_id):
+        super(Worker, self).__init__()
         self.agent = agent
+        self.worker_id = worker_id
 
     def cal_adv(self, states, rewards, value_pred, dones, gamma):
         """
@@ -84,16 +87,18 @@ class Worker:
             delta = rewards[t] + gamma * value_pred[t + 1] * non_terminal - value_pred[t]
             last_adv = delta + gamma * non_terminal * last_adv
             advantages[t] = last_adv
-        return advantages, advantages + value_pred[:T]
+        value_target = advantages + value_pred[:T]
+        # advantages = (advantages - torch.mean(advantages)) / torch.std(advantages)
+        return advantages, value_target
 
     def work(self, discrete):
         # env = wrappers.make_atari("BreakoutNoFrameskip-v4")
         # env = wrappers.wrap_deepmind(env, frame_stack=True)
-        env = gym.make('Pendulum-v0')
+        env = gym.make('CartPole-v1')
         LEARN = True
         device = torch.device("cuda:0")
-
-        episode, t, T, total_reward, horizon = 0, 0, 0, 0, 32
+        global episode
+        t, T, total_reward, horizon = 0, 0, 0, 32
         done = True
         reward_array = np.array([])
 
@@ -118,7 +123,7 @@ class Worker:
                 total_reward = 0
             if LEARN is False:
                 env.render()
-            action = self.agent.choose_action(state.unsqueeze(0).to(device))
+            action = self.agent.choose_action(state.to(device))
             # print('action: {}'.format(action))
             if discrete:
                 observation, reward, done, info = env.step(int(action))
@@ -141,9 +146,7 @@ class Worker:
                 advantages, value_target = self.cal_adv(states=state_collections, rewards=reward_collections,
                                                         value_pred=value_collections, dones=done_collections,
                                                         gamma=0.99)
-                self.agent.learn(state_collections=state_collections, action_collections=action_collections,
-                                 advantage_collections=advantages, value_target=value_target)
-                yield advantages, value_target
+                yield state_collections, action_collections, advantages, value_target
                 # state_collections = torch.zeros(horizon, 4, 84, 84)
                 state_collections = torch.zeros(horizon, env.observation_space.shape[0])
                 action_collections = torch.zeros(horizon)
@@ -155,7 +158,7 @@ class Worker:
             action_collections[t % horizon] = action
             reward_collections[t % horizon] = reward
             done_collections[t % horizon] = done
-            value_collections[t % horizon] = self.agent.net.forward(state.unsqueeze(0).to(device))[1]
+            value_collections[t % horizon] = self.agent.net.forward(state.to(device))[1]
 
             state = preprocess(observation)  # next state
             t += 1
@@ -165,9 +168,10 @@ class Worker:
 if __name__ == '__main__':
     # env = wrappers.make_atari("BreakoutNoFrameskip-v4")
     # env = wrappers.wrap_deepmind(env, frame_stack=True)
-    env = gym.make('Pendulum-v0')
+    env = gym.make('CartPole-v1')
     device = torch.device("cuda:0")
     LEARN = True
+    i, episode = 0, 0
     n_state = env.observation_space.shape[0]
     if isinstance(env.action_space, gym.spaces.Box):
         discrete = False
@@ -176,9 +180,31 @@ if __name__ == '__main__':
         discrete = True
         n_action = env.action_space.n
     ppo = PPO.Model(net=PPO.Net, learn=LEARN, device=device, n_state=n_state, n_action=n_action, discrete=discrete,
-                    learning_rate=0.00025, epsilon=0.2)
-    worker = Worker(agent=ppo)
-    iter_unit = worker.work(discrete=discrete)
+                    learning_rate=0.00005, epsilon=0.2)
+    workers = [Worker(agent=ppo, worker_id=i) for i in range(2)]
+    iter_units = []
+    process_list = []
+    for worker in workers:
+        process = mp.Process(target=worker.work, args=(discrete,))
+        process_list.append(process)
+        iter_units.append(worker.work(discrete=discrete))
+        process.start()
+
+    for process in process_list:
+        process.join()
 
     while True:
-        adv, v_target = iter_unit.__next__()
+        s_list, a_list, adv_list, vt_list = [], [], [], []
+        for index, iter_unit in enumerate(iter_units):
+            s, a, ad, vt = iter_unit.__next__()
+            loss = ppo.learn(state_collections=s, action_collections=a, advantage_collections=ad,
+                             value_target=vt)
+        #     s_list.append(s)
+        #     a_list.append(a)
+        #     adv_list.append(ad)
+        #     vt_list.append(vt)
+        # states, actions, adv, v_target = torch.cat(s_list), torch.cat(a_list), torch.cat(adv_list), torch.cat(vt_list)
+        # loss = ppo.learn(state_collections=states, action_collections=actions, advantage_collections=adv,
+        #                  value_target=v_target)
+        # print('##############  Iteration: {}   ->    Loss: {}  ##############'.format(i, loss))
+        i += 1
