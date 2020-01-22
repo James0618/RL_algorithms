@@ -14,6 +14,7 @@ from PIL import Image
 class AtariNet(nn.Module):
     def __init__(self, output_shape):
         super(AtariNet, self).__init__()
+        self.discrete = True
         self.conv = nn.Sequential(      # input_shape: 4*84*84
             nn.Conv2d(
                 in_channels=4,          # Gray: 1 channels * 4 images/
@@ -85,10 +86,10 @@ class Worker:
             advantages[t] = last_adv
         return advantages, advantages + value_pred[:T]
 
-    def work(self):
+    def work(self, discrete):
         # env = wrappers.make_atari("BreakoutNoFrameskip-v4")
         # env = wrappers.wrap_deepmind(env, frame_stack=True)
-        env = gym.make('CartPole-v1')
+        env = gym.make('Pendulum-v0')
         LEARN = True
         device = torch.device("cuda:0")
 
@@ -99,8 +100,10 @@ class Worker:
         observation = env.reset()
         state = preprocess(observation)
 
+        # state_collections = torch.zeros(horizon, 4, 84, 84)
         state_collections = torch.zeros(horizon, env.observation_space.shape[0])
         action_collections = torch.zeros(horizon)
+        # action_collections = torch.zeros(horizon, env.action_space.shape[0])
         reward_collections = torch.zeros(horizon)
         done_collections = torch.zeros(horizon + 1)
         value_collections = torch.zeros(horizon + 1)
@@ -108,39 +111,43 @@ class Worker:
             if done:
                 observation = env.reset()
                 state = preprocess(observation)
-                total_reward = 0
                 print("Episode {}: finished after {} timesteps".format(episode, t - T))
+                print("            total_reward -> {}".format(total_reward))
                 T = t
                 episode += 1
+                total_reward = 0
             if LEARN is False:
                 env.render()
-
-            action = self.agent.choose_action(state.to(device))
+            action = self.agent.choose_action(state.unsqueeze(0).to(device))
             # print('action: {}'.format(action))
-            observation, reward, done, info = env.step(int(action))
+            if discrete:
+                observation, reward, done, info = env.step(int(action))
+                if reward > 1:
+                    reward = 1
+                elif reward < -1:
+                    reward = -1
+            else:
+                observation, reward, done, info = env.step([float(action)])
+                if reward > 1:
+                    reward = 1
+                elif reward < -1:
+                    reward = -1
             # img = Image.fromarray(observation.frame(0))
             # img.show()
-            x, x_dot, theta, theta_dot = observation
-            # use the reward as Morvan Zhou defined
-            # https://github.com/MorvanZhou/PyTorch-Tutorial/blob/master/tutorial-contents/405_DQN_Reinforcement_learning.py
-            r1 = (env.x_threshold - abs(x)) / env.x_threshold - 0.8
-            r2 = (env.theta_threshold_radians - abs(theta)) / env.theta_threshold_radians - 0.5
-            reward = r1 + r2
-
-            total_reward += reward
 
             if t > 0 and t % horizon == 0:
                 done_collections[horizon] = done
-                value_collections[horizon] = self.agent.net.forward(state.to(device))[1]
+                value_collections[horizon] = self.agent.net.forward(state.unsqueeze(0).to(device))[1]
                 advantages, value_target = self.cal_adv(states=state_collections, rewards=reward_collections,
                                                         value_pred=value_collections, dones=done_collections,
-                                                        gamma=0.95)
+                                                        gamma=0.99)
                 self.agent.learn(state_collections=state_collections, action_collections=action_collections,
                                  advantage_collections=advantages, value_target=value_target)
                 yield advantages, value_target
                 # state_collections = torch.zeros(horizon, 4, 84, 84)
                 state_collections = torch.zeros(horizon, env.observation_space.shape[0])
                 action_collections = torch.zeros(horizon)
+                # action_collections = torch.zeros(horizon, env.action_space.shape[0])
                 reward_collections = torch.zeros(horizon)
                 done_collections = torch.zeros(horizon + 1)
                 value_collections = torch.zeros(horizon + 1)
@@ -148,23 +155,30 @@ class Worker:
             action_collections[t % horizon] = action
             reward_collections[t % horizon] = reward
             done_collections[t % horizon] = done
-            value_collections[t % horizon] = self.agent.net.forward(state.to(device))[1]
+            value_collections[t % horizon] = self.agent.net.forward(state.unsqueeze(0).to(device))[1]
 
             state = preprocess(observation)  # next state
             t += 1
+            total_reward += reward
 
 
 if __name__ == '__main__':
     # env = wrappers.make_atari("BreakoutNoFrameskip-v4")
     # env = wrappers.wrap_deepmind(env, frame_stack=True)
-    env = gym.make('CartPole-v1')
+    env = gym.make('Pendulum-v0')
     device = torch.device("cuda:0")
     LEARN = True
-
-    ppo = PPO.Model(net=PPO.Net, learn=LEARN, device=device, n_state=env.observation_space.shape[0],
-                    n_action=env.action_space.n, learning_rate=0.002, epsilon=0.1)
+    n_state = env.observation_space.shape[0]
+    if isinstance(env.action_space, gym.spaces.Box):
+        discrete = False
+        n_action = env.action_space.shape[0]
+    else:
+        discrete = True
+        n_action = env.action_space.n
+    ppo = PPO.Model(net=PPO.Net, learn=LEARN, device=device, n_state=n_state, n_action=n_action, discrete=discrete,
+                    learning_rate=0.00025, epsilon=0.2)
     worker = Worker(agent=ppo)
-    iter_unit = worker.work()
+    iter_unit = worker.work(discrete=discrete)
 
     while True:
         adv, v_target = iter_unit.__next__()

@@ -9,7 +9,10 @@
       <w>dppo</w>
       <w>frameskip</w>
       <w>fromarray</w>
+      <w>logp</w>
+      <w>logstd</w>
       <w>lstm</w>
+      <w>probs</w>
       <w>timesteps</w>
     </words>
   </dictionary>
