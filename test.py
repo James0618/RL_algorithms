@@ -185,8 +185,13 @@ if __name__ == '__main__':
         discrete = True
         n_action = env.action_space.n
 
-    ppo = PPO.Model(net=PPO.Net, learn=LEARN, device=device, n_state=n_state, n_action=n_action, discrete=discrete,
-                    learning_rate=0.00025, epsilon=0.1)
+    net = PPO.Net(n_state, n_action, discrete).to(device)
+    net.share_memory()
+    old_net = PPO.Net(n_state, n_action, discrete).to(device)
+    old_net.share_memory()
+
+    ppo = PPO.Model(net=net, old_net=old_net, learn=LEARN, device=device, n_state=n_state, n_action=n_action,
+                    discrete=discrete, learning_rate=0.00025, epsilon=0.1)
     workers = [Worker(worker_id=i, agent=ppo) for i in range(THREAD_NUMBER)]
     process_list = []
 
