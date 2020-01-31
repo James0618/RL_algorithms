@@ -52,28 +52,28 @@ class Net(nn.Module):
             return distribution, action_values
         else:
             mean, logstd = self.mean(actions), self.logstd(actions)
-            std = torch.tanh(logstd) + 1.01
+            std = torch.nn.functional.softplus(logstd) + 0.01
             mean = 2 * torch.tanh(mean)
             distribution = Normal(loc=mean, scale=std)
             return distribution, action_values
 
 
 class Model:
-    def __init__(self, net, device, n_state, n_action, discrete, learn=False, gamma=0.95, learning_rate=0.005,
-                 epsilon=0.1):
+    def __init__(self, net, old_net, device, n_state, n_action, discrete, agent_id=0,
+                 learn=False, learning_rate=0.005, epsilon=0.1):
         # init networks
         if learn is True:
             # self.net = net(output_shape=n_action).to(device)
-            self.net = net(n_state, n_action, discrete).to(device)
+            self.net = net
         else:
             self.load_net()
         # self.old_net = net(output_shape=n_action).to(device)
-        self.old_net = net(n_state, n_action, discrete).to(device)
+        self.old_net = old_net
         self.n_action = n_action
-        self.gamma = gamma
         self.learning_rate = learning_rate
         self.epsilon = epsilon
         self.device = device
+        self.id = agent_id
 
     def learn(self, state_collections, action_collections, advantage_collections, value_target):
         """
@@ -92,11 +92,12 @@ class Model:
 
         self.old_net.load_state_dict(self.net.state_dict())
         optimizer = torch.optim.Adam(params=self.net.parameters(), lr=self.learning_rate)
+        idx_list = self.batch(T, 2)
+
         for j in range(3):
             # loss = mean(ratio * advantages) - lambda * KL(old_net, net)
             # J = -loss
             # print(torch.exp(self.policy.forward(state_collections).log_prob(action_collections)))
-            idx_list = self.batch(T, 2)
             for idx in idx_list:
                 idx = torch.LongTensor(idx).to(device=self.device)
                 state_sample = state_collections.index_select(0, idx)
@@ -110,12 +111,6 @@ class Model:
                 else:
                     logp = self.net.forward(state_sample)[0].log_prob(action_sample).squeeze()
                     old_logp = self.old_net.forward(state_sample)[0].log_prob(action_sample).squeeze()
-                    # dis = self.net.forward(state_sample)[0]
-                    # mean, std = dis.mean, dis.stddev
-                    # old_dis = self.old_net.forward(state_sample)[0]
-                    # old_mean, old_std = old_dis.mean, old_dis.stddev
-                    # logp = -(0.5 * torch.pow((action_sample - mean) / std, 2) + torch.log(std))
-                    # old_logp = -(0.5 * torch.pow((action_sample - old_mean) / old_std, 2) + torch.log(old_std))
                     ratio = torch.div(torch.exp(logp) + 0.01, torch.exp(old_logp) + 0.01).squeeze()
                 # a = torch.mul(ratio, advantage_sample.detach())
                 clip_loss = - torch.mean(torch.min(torch.mul(ratio, advantage_sample.detach()),
@@ -130,7 +125,7 @@ class Model:
                 optimizer.zero_grad()
                 loss.backward(retain_graph=True)
                 optimizer.step()
-        return loss
+        return self.id, loss
 
     def choose_action(self, state):
         # print(self.policy.forward(state).probs)
@@ -149,6 +144,9 @@ class Model:
             idx_list.append(temp)
             temp = []
         return idx_list
+
+    def set_net(self, net):
+        self.net.load_state_dict(net.state_dict())
 
     def save_net(self):
         torch.save(self.net, 'params/ppo_net.pkl')

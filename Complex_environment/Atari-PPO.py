@@ -33,7 +33,9 @@ class AtariNet(nn.Module):
             nn.ReLU()
         )
         self.feature_layer = nn.Sequential(
-            nn.Linear(2592, 256),
+            nn.Linear(2592, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 256),
             nn.ReLU()
         )
         self.state_value = nn.Linear(256, 1)
@@ -123,21 +125,14 @@ class Worker:
                 total_reward = 0
             if LEARN is False:
                 env.render()
-            action = self.agent.choose_action(state.to(device))
+            action = self.agent.choose_action(state.unsqueeze(0).to(device))
             # print('action: {}'.format(action))
             if discrete:
                 observation, reward, done, info = env.step(int(action))
-                if reward > 1:
-                    reward = 1
-                elif reward < -1:
-                    reward = -1
             else:
                 observation, reward, done, info = env.step([float(action)])
-                if reward > 1:
-                    reward = 1
-                elif reward < -1:
-                    reward = -1
-            # img = Image.fromarray(observation.frame(0))
+                # reward = (reward + 8) / 8
+            # img = Image.fromarray(255 * state.numpy()[0])
             # img.show()
 
             if t > 0 and t % horizon == 0:
@@ -158,7 +153,7 @@ class Worker:
             action_collections[t % horizon] = action
             reward_collections[t % horizon] = reward
             done_collections[t % horizon] = done
-            value_collections[t % horizon] = self.agent.net.forward(state.to(device))[1]
+            value_collections[t % horizon] = self.agent.net.forward(state.unsqueeze(0).to(device))[1]
 
             state = preprocess(observation)  # next state
             t += 1
@@ -180,8 +175,8 @@ if __name__ == '__main__':
         discrete = True
         n_action = env.action_space.n
     ppo = PPO.Model(net=PPO.Net, learn=LEARN, device=device, n_state=n_state, n_action=n_action, discrete=discrete,
-                    learning_rate=0.00005, epsilon=0.2)
-    workers = [Worker(agent=ppo, worker_id=i) for i in range(2)]
+                    learning_rate=0.00005, epsilon=0.1)
+    workers = [Worker(agent=ppo, worker_id=i) for i in range(1)]
     iter_units = []
     process_list = []
     for worker in workers:
