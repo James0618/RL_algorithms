@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="0109929d-eda2-402d-902a-496a2b95fc2c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Simple_environment/PPO.py" beforeDir="false" afterPath="$PROJECT_DIR$/Simple_environment/PPO.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -77,7 +77,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.test">
+  <component name="RunManager" selected="Python.PPO">
     <configuration name="Atari-PPO" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="RL_algorithms" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -174,10 +174,10 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.PPO" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.test2" />
         <item itemvalue="Python.Atari-PPO" />
-        <item itemvalue="Python.PPO" />
       </list>
     </recent_temporary>
   </component>
@@ -250,7 +250,8 @@
       <workItem from="1579865081159" duration="3105000" />
       <workItem from="1580372532347" duration="1005000" />
       <workItem from="1580374271680" duration="12586000" />
-      <workItem from="1580466486638" duration="10876000" />
+      <workItem from="1580466486638" duration="10914000" />
+      <workItem from="1580549242036" duration="1776000" />
     </task>
     <task id="LOCAL-00001" summary="PPO">
       <created>1576921982153</created>
@@ -284,7 +285,7 @@
     <option name="LAST_COMMIT_MESSAGE" value="PPO" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/RL_algorithms$PPO.coverage" NAME="PPO Coverage Results" MODIFIED="1579865965793" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
+    <SUITE FILE_PATH="coverage/RL_algorithms$PPO.coverage" NAME="PPO Coverage Results" MODIFIED="1580557145150" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$PPO__1_.coverage" NAME="PPO (1) Coverage Results" MODIFIED="1579076729405" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Simple_environment" />
     <SUITE FILE_PATH="coverage/RL_algorithms$DPPO.coverage" NAME="DPPO Coverage Results" MODIFIED="1577784640542" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_algorithms$Atari_PPO__1_.coverage" NAME="Atari-PPO (1) Coverage Results" MODIFIED="1580374397647" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
