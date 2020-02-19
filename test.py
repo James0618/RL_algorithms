@@ -53,15 +53,6 @@ class AtariNet(nn.Module):
         return distribution, action_values
 
 
-# def preprocess(obs):
-#     for index in range(4):
-#         if index == 0:
-#             result = transforms.ToTensor()(obs.frame(index))
-#         else:
-#             temp = transforms.ToTensor()(obs.frame(index))
-#             result = torch.cat((result, temp), dim=0)
-#     return result       # shape: 4*84*84
-
 def preprocess(obs):
     return torch.from_numpy(obs).float()
 
@@ -70,7 +61,7 @@ class Worker:
     def __init__(self, worker_id, agent):
         super(Worker, self).__init__()
         self.worker_id = worker_id
-        self.horizon = 32
+        self.horizon = 64
         # self.agent = PPO.Model(net=PPO.Net, agent_id=worker_id, learn=LEARN, device=device, n_state=n_state,
         #                        n_action=n_action, discrete=discrete, learning_rate=0.000025, epsilon=0.1)
         self.agent = agent
@@ -167,7 +158,7 @@ class Worker:
 if __name__ == '__main__':
     # env = wrappers.make_atari("BreakoutNoFrameskip-v4")
     # env = wrappers.wrap_deepmind(env, frame_stack=True)
-    THREAD_NUMBER = 1
+    THREAD_NUMBER = 3
     env = gym.make('CartPole-v1')
     # device = torch.device("cuda:0")
     device = torch.device('cpu')
@@ -191,7 +182,7 @@ if __name__ == '__main__':
     old_net.share_memory()
 
     ppo = PPO.Model(net=net, old_net=old_net, learn=LEARN, device=device, n_state=n_state, n_action=n_action,
-                    discrete=discrete, learning_rate=0.00025, epsilon=0.1)
+                    discrete=discrete, learning_rate=0.0001, epsilon=0.1)
     workers = [Worker(worker_id=i, agent=ppo) for i in range(THREAD_NUMBER)]
     process_list = []
 

@@ -88,7 +88,6 @@ class Model:
         action_collections = action_collections.to(self.device)
         advantage_collections = advantage_collections.to(self.device)
         value_target = value_target.to(self.device)
-        predict_value = self.net.forward(state_collections)[1]
 
         self.old_net.load_state_dict(self.net.state_dict())
         optimizer = torch.optim.Adam(params=self.net.parameters(), lr=self.learning_rate)
@@ -99,6 +98,8 @@ class Model:
             # J = -loss
             # print(torch.exp(self.policy.forward(state_collections).log_prob(action_collections)))
             for idx in idx_list:
+                predict_value = self.net.forward(state_collections)[1]
+
                 idx = torch.LongTensor(idx).to(device=self.device)
                 state_sample = state_collections.index_select(0, idx)
                 action_sample = action_collections.index_select(0, idx)
@@ -119,12 +120,13 @@ class Model:
                                                        advantage_sample.detach())
                                                    )
                                          )
-                vf_loss = torch.mean(torch.pow(predict_sample - target_sample, 2))
+                vf_loss = torch.mean(torch.pow(predict_sample - target_sample.detach(), 2))
                 loss = vf_loss + clip_loss
 
                 optimizer.zero_grad()
-                loss.backward(retain_graph=True)
+                loss.backward()
                 optimizer.step()
+
         return self.id, loss
 
     def choose_action(self, state):
